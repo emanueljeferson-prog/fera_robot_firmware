@@ -30,14 +30,14 @@ add_executable(firmware
 )
 
 add_subdirectory(core)
-#add_subdirectory(application)
+add_subdirectory(application)
 #add_subdirectory(service)
 #add_subdirectory(hal)
 
 target_link_libraries(firmware
     #pico_stdlib
     core
-    #application
+    app
     #service
     #hal
 )
