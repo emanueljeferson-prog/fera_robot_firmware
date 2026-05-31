@@ -5,7 +5,14 @@
 
 namespace core {
 
-class Middleware {
+class IMiddleware {
+public:
+    virtual ~IMiddleware() = default; 
+    virtual void subscribe(Callback cb, const Topics tp) = 0;
+    virtual void publish(Message& msg) = 0;
+};
+
+class Middleware: public IMiddleware {
 public:
     Middleware();
     void subscribe(Callback cb, const Topics tp);

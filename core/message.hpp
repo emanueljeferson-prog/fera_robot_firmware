@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <cstdint>
+#include <string>
 #include <functional>
 
 namespace core {
@@ -37,7 +38,7 @@ private:
     const Topics topic;
 };
 
-struct RegisterTask: Message {
+struct RegisterTask: public Message {
 public:
     RegisterTask(TaskDescription desc, const Topics tp): Message(tp) {}
 };
