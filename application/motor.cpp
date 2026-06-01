@@ -4,7 +4,7 @@
 namespace app {
 
 Motor::Motor(uint8_t id, core::IMiddleware& middleware)
-: id(id), middleware(middleware) {
+: id(id), middleware(middleware), speed(0.0) {
     std::cout << "[APP] [MOTOR: " << (int)id << "] [START]" << std::endl;
 } 
 void Motor::init() {
@@ -28,6 +28,7 @@ void Motor::init() {
         },
         core::Topics::REGISTER_TASK
     );
+    
     middleware.publish(register_task_control_msg);
     middleware.publish(register_task_speed_msg);
 }
@@ -36,7 +37,9 @@ void Motor::control() {
 }
 
 void Motor::readSpeed() {
-    std::cout << "[APP] [MOTOR: " << (int)id << "] [READ SPEED TASK]" << std::endl;
+    auto read_speed_msg = core::ReadSpeedMessage(speed, core::Topics::READ_SPEED);
+    middleware.publish(read_speed_msg);
+    std::cout << "[APP] [MOTOR: " << (int)id << "] [READ SPEED TASK]: " << speed << std::endl;
 }
 
 void Motor::controlWrapper(void* params) {

@@ -54,9 +54,14 @@ public:
     const uint32_t delay;
 };
 
+struct ReadSpeedMessage: public Message {
+public:
+    ReadSpeedMessage(double& speed, const Topics tp)
+    : speed(speed), Message(tp) {}
+    double& speed;
+};
+
 }
-
-
 
 
 

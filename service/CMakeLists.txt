@@ -6,6 +6,7 @@ file(GLOB FREERTOS_POSIX_UTILS
 
 add_library(service
     rtos.cpp
+    encoder.cpp
     ${FREERTOS_KERNEL_PATH}/tasks.c
     ${FREERTOS_KERNEL_PATH}/queue.c
     ${FREERTOS_KERNEL_PATH}/list.c
