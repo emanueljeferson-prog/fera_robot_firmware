@@ -1,2 +1,3 @@
 **/.vscode/
 **/build/
+**/rtos/FreeRTOS-Kernel/

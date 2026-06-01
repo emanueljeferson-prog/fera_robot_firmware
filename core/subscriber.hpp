@@ -7,7 +7,8 @@ namespace core {
 struct Subscriber
 {
     Callback callback;
-    Topics topic;      
+    Topics topic;     
+    bool delete_flag; 
 };
 
 }

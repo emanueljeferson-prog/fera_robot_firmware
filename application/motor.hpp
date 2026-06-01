@@ -11,6 +11,8 @@ public:
     void init();
     void control();
     void readSpeed();
+    static void controlWrapper(void* params);
+    static void readSpeedWrapper(void* params);
 private:
     const uint8_t id; 
     double speed; 
