@@ -37,7 +37,7 @@ void Motor::control() {
 }
 
 void Motor::readSpeed() {
-    auto read_speed_msg = core::ReadSpeedMessage(speed, core::Topics::READ_SPEED);
+    auto read_speed_msg = core::ReadSpeedMessage(id, speed, core::Topics::READ_SPEED);
     middleware.publish(read_speed_msg);
     std::cout << "[APP] [MOTOR: " << (int)id << "] [READ SPEED TASK]: " << speed << std::endl;
 }

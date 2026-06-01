@@ -56,8 +56,9 @@ public:
 
 struct ReadSpeedMessage: public Message {
 public:
-    ReadSpeedMessage(double& speed, const Topics tp)
-    : speed(speed), Message(tp) {}
+    ReadSpeedMessage(uint8_t id, double& speed, const Topics tp)
+    : id(id), speed(speed), Message(tp) {}
+    const uint8_t id;
     double& speed;
 };
 
