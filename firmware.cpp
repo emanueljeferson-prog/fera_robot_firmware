@@ -7,7 +7,7 @@
 
 int main() {
     auto broker = core::Middleware(); 
-    auto rtos = service::RtosService(broker);
+    auto rtos = service::Rtos(broker);
     auto encoder = service::Encoder(broker);
     auto motor = app::Motor(0, broker);
 

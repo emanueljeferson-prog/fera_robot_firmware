@@ -5,12 +5,12 @@
 #include <iostream>
 
 namespace service {
-RtosService::RtosService(core::IMiddleware& middleware) 
+Rtos::Rtos(core::IMiddleware& middleware) 
 : middleware(middleware) {
     std::cout << "[SERVICE] [RTOS] [START]" << std::endl;
 }
 
-void RtosService::init() {
+void Rtos::init() {
     middleware.subscribe(
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::REGISTER_TASK)) {
@@ -33,7 +33,7 @@ void RtosService::init() {
     );
 }
 
-void RtosService::createTask(const core::TaskDescription desc) {
+void Rtos::createTask(const core::TaskDescription desc) {
     std::cout << "[SERVICE] [RTOS] [TASK CREATED]: " << desc.task_name << std::endl;
     xTaskCreate(
         desc.task,
@@ -45,11 +45,11 @@ void RtosService::createTask(const core::TaskDescription desc) {
     );
 }
 
-void RtosService::startScheduler() {
+void Rtos::startScheduler() {
     vTaskStartScheduler();
 }
 
-void RtosService::delayTask(const uint32_t delay) {
+void Rtos::delayTask(const uint32_t delay) {
     vTaskDelay(pdMS_TO_TICKS(delay));
 }
 

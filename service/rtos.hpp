@@ -4,9 +4,9 @@
 
 namespace service {
 
-class RtosService: public IService {
+class Rtos: public IService {
 public:
-    RtosService(core::IMiddleware& middleware);
+    Rtos(core::IMiddleware& middleware);
     void init() override;
     void createTask(core::TaskDescription desc);
     void startScheduler();
