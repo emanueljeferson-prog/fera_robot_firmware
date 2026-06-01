@@ -10,7 +10,7 @@ int main() {
 
     rtos.init();
     motor.init();
-
+    
     broker.run();
 
     rtos.startScheduler();

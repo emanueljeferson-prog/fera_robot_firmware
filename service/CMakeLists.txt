@@ -22,6 +22,7 @@ target_link_libraries(service
 )
 
 target_include_directories(service PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/rtos 
     ${FREERTOS_KERNEL_PATH}/include
     ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/Posix
     ${CMAKE_CURRENT_SOURCE_DIR}

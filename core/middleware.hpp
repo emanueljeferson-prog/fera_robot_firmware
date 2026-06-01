@@ -16,9 +16,9 @@ public:
 class Middleware: public IMiddleware {
 public:
     Middleware();
-    void subscribe(Callback cb, const Topics tp, bool delete_flag);
-    void publish(Message& msg);
-    void run();
+    void subscribe(Callback cb, const Topics tp, bool delete_flag) override;
+    void publish(Message& msg) override;
+    void run() override;
 private:
     std::vector<Subscriber> subcribers;
 }; 

@@ -29,14 +29,12 @@ void RtosService::init() {
             }
         }, 
         core::Topics::DEALY_TASK,
-        true
+        false
     );
 }
 
 void RtosService::createTask(const core::TaskDescription desc) {
-    // Task creation logic here
     std::cout << "[SERVICE] [RTOS] [TASK CREATED]: " << desc.task_name << std::endl;
-    //desc.task(desc.parameters); // For demonstration, we directly call the task function
     xTaskCreate(
         desc.task,
         desc.task_name.c_str(),
@@ -48,12 +46,11 @@ void RtosService::createTask(const core::TaskDescription desc) {
 }
 
 void RtosService::startScheduler() {
-    // Scheduler start logic here
     vTaskStartScheduler();
 }
 
 void RtosService::delayTask(const uint32_t delay) {
-    // Task delay logic here
     vTaskDelay(pdMS_TO_TICKS(delay));
 }
+
 }
