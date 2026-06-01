@@ -1,14 +1,14 @@
 #pragma once
 
-#include "core/middleware.hpp"
+#include "app_base.hpp"
 #include <cstdint>
 
 namespace app {
 
-class Motor {
+class Motor: public IApplication {
 public:
     Motor(uint8_t id, core::IMiddleware& middleware); 
-    void init();
+    void init() override;
     void control();
     void readSpeed();
     static void controlWrapper(void* params);
