@@ -1,5 +1,6 @@
 add_library(hal
     gpio.cpp
+    pwm.cpp
 )
 
 target_include_directories(hal PUBLIC

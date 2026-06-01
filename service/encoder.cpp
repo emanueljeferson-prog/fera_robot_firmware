@@ -71,8 +71,6 @@ void Encoder::readSpeed(uint8_t id, double& speed) {
         return;
     }
     speed = 42.5;
-    // print the pins setted for the first channel
-    std::cout << "Pins for first channel: " << (int)channels[id].pinA << ", " << (int)channels[id].pinB << std::endl;
     //speed = static_cast<double>(channels[id].pulseCount);
 }
 

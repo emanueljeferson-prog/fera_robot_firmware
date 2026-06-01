@@ -33,6 +33,8 @@ void Motor::init() {
     middleware.publish(register_task_speed_msg);
 }
 void Motor::control() {
+    auto control_msg = core::ControlMotorMessage(id, -1000, core::Topics::MOTOR_CONTROL);
+    middleware.publish(control_msg);
     std::cout << "[APP] [MOTOR: " << (int)id << "] [CONTROL TASK]" << std::endl;
 }
 

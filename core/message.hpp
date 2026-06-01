@@ -56,11 +56,19 @@ public:
 
 struct ReadSpeedMessage: public Message {
 public:
-    ReadSpeedMessage(uint8_t id, double& speed, const Topics tp)
+    ReadSpeedMessage(const uint8_t id, double& speed, const Topics tp)
     : id(id), speed(speed), Message(tp) {}
     const uint8_t id;
     double& speed;
 };
+
+struct ControlMotorMessage: public Message {
+public: 
+    ControlMotorMessage(const uint8_t id, const int16_t signal, const Topics tp)
+    : id(id), signal(signal), Message(tp) {}
+    const uint8_t id;
+    const int16_t signal;
+};   
 
 }
 
