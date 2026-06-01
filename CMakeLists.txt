@@ -32,14 +32,14 @@ add_executable(firmware
 add_subdirectory(core)
 add_subdirectory(application)
 add_subdirectory(service)
-#add_subdirectory(hal)
+add_subdirectory(hal)
 
 target_link_libraries(firmware
     #pico_stdlib
     core
     app
     service
-    #hal
+    hal
 )
 
 SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
