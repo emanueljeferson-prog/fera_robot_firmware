@@ -11,7 +11,9 @@ public:
     void createTask(core::TaskDescription desc);
     void startScheduler();
     void delayTask(const uint32_t delay);
+    uint16_t getElapsedTime();
 private:
+    uint16_t tickStartTime;
     core::IMiddleware& middleware;
 };
 

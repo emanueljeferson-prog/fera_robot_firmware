@@ -5,8 +5,10 @@
 #include <iostream>
 
 namespace service {
+
 Rtos::Rtos(core::IMiddleware& middleware) 
 : middleware(middleware) {
+    tickStartTime = xTaskGetTickCount();
     std::cout << "[SERVICE] [RTOS] [START]" << std::endl;
 }
 
@@ -51,6 +53,10 @@ void Rtos::startScheduler() {
 
 void Rtos::delayTask(const uint32_t delay) {
     vTaskDelay(pdMS_TO_TICKS(delay));
+}
+
+uint16_t Rtos::getElapsedTime() {
+    return xTaskGetTickCount() - tickStartTime;
 }
 
 }
