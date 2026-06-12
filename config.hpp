@@ -16,14 +16,14 @@ struct PolynomialGain {
     }
 };
 
-struct EncoderConfig {
+struct EncoderDriveConfig {
     uint8_t pin_a;
     uint8_t pin_b;
     uint32_t reduction_factor;
     uint32_t pulses_per_rev;
 };
 
-struct DriverConfig {
+struct MotorDriverConfig {
     uint8_t pin_a;
     uint8_t pin_b;
     uint32_t pwm_wrap;
@@ -39,15 +39,22 @@ struct PIDConfig {
 };
 
 struct MotorConfig {
-    EncoderConfig encoder;
-    DriverConfig driver;
+    EncoderDriveConfig encoder;
+    MotorDriverConfig driver;
     PIDConfig pid;
 };
 
+struct MicroRosConfig {
+    std::string node_name;
+    std::string publish_topic;
+    std::string subscribe_topic;
+};
+
+
 static constexpr std::array<MotorConfig, 2> motorConfigs = {
     MotorConfig{
-        EncoderConfig{18, 19, 496, 11},
-        DriverConfig{20, 21, 1000},
+        EncoderDriveConfig{18, 19, 496, 11},
+        MotorDriverConfig{20, 21, 1000},
         PIDConfig{
             PolynomialGain{131.6, 10.01, 0.01, 50.0},
             PolynomialGain{0.0, 0.0, 0.0, 0.0},
@@ -58,8 +65,8 @@ static constexpr std::array<MotorConfig, 2> motorConfigs = {
         }
     },
     MotorConfig{
-        EncoderConfig{16, 17, 496, 11},
-        DriverConfig{22, 23, 1000},
+        EncoderDriveConfig{16, 17, 496, 11},
+        MotorDriverConfig{22, 23, 1000},
         PIDConfig{
             PolynomialGain{131.6, 10.01, 0.01, 50.0},
             PolynomialGain{0.0, 0.0, 0.0, 0.0},
@@ -72,5 +79,11 @@ static constexpr std::array<MotorConfig, 2> motorConfigs = {
 };
 
 static constexpr size_t motorCount = motorConfigs.size();
+
+static const MicroRosConfig microRosConfig {
+    "pico_node",
+    "sensor_data",
+    "speed_cmd"
+};
 
 }
