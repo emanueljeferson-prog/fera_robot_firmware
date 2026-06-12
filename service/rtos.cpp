@@ -25,12 +25,12 @@ void Rtos::init() {
     );
     middleware.subscribe(
         [this](const core::Message& msg) {
-            if(msg.compareTopic(core::Topics::DEALY_TASK)) {
+            if(msg.compareTopic(core::Topics::DELAY_TASK)) {
                 const auto& delay_msg = static_cast<const core::DelayTask&>(msg);
                 this->delayTask(delay_msg.delay);
             }
         }, 
-        core::Topics::DEALY_TASK,
+        core::Topics::DELAY_TASK,
         false
     );
 }

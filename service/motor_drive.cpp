@@ -1,10 +1,12 @@
 #include "motor_drive.hpp"
+#include <iostream>
 
 namespace service {
 
 MotorDrive::MotorDrive(core::IMiddleware& middleware)
 : middleware(middleware) {
     channels.clear();
+    std::cout << "[SERVICE] [MOTOR DRIVE] [START]" << std::endl;
 }
 
 void MotorDrive::registerMotor(uint8_t pinA, uint8_t pinB) {
@@ -15,12 +17,12 @@ void MotorDrive::init() {
 
     middleware.subscribe(
         [this](const core::Message& msg) {
-            if(msg.compareTopic(core::Topics::MOTOR_CONTROL)) {
-                const auto& control_msg = static_cast<const core::ControlMotorMessage&>(msg); 
-                move(control_msg.id, control_msg.signal);
+            if(msg.compareTopic(core::Topics::MOTOR_COMMAND)) {
+                const auto& command_msg = static_cast<const core::MotorCommandMessage&>(msg); 
+                move(command_msg.id, command_msg.signal);
             }
         },
-        core::Topics::MOTOR_CONTROL,
+        core::Topics::MOTOR_COMMAND,
         false
     );
     for(auto& channel: channels) {
