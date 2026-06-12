@@ -1,5 +1,6 @@
 add_library(app
     motor.cpp
+    imu.cpp
 )
 
 target_include_directories(app PUBLIC
@@ -8,7 +9,5 @@ target_include_directories(app PUBLIC
 )
 
 target_link_libraries(app
-    #pico_stdlib
-    #hardware_spi
-    #hardware_gpio
+    pico_stdlib
 )

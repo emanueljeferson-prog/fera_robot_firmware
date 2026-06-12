@@ -1,4 +1,5 @@
 #include "core/middleware.hpp"
+#include <iostream>
 
 namespace app { 
 
