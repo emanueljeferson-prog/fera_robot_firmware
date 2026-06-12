@@ -1,23 +1,24 @@
-#include "encoder.hpp"
+#include "encoder_drive.hpp"
 #include "hal/gpio.hpp"
 #include <iostream>
 
 namespace service {
 
-Encoder* Encoder::instance = nullptr;
-std::unordered_map<uint32_t, size_t> Encoder::channelByPin;
+EncoderDrive* EncoderDrive::instance = nullptr;
+std::unordered_map<uint32_t, size_t> EncoderDrive::channelByPin;
 
-Encoder::Encoder(core::IMiddleware& middleware)
+EncoderDrive::EncoderDrive(core::IMiddleware& middleware)
 : middleware(middleware) {
     channels.clear();
     instance = this;
+    std::cout << "[SERVICE] [ENCODER DRIVE] [START]" << std::endl;
 }
 
-void Encoder::registerEncoder(uint8_t pinA, uint8_t pinB) {
+void EncoderDrive::registerEncoderDrive(uint8_t pinA, uint8_t pinB) {
     channels.push_back(Channel{pinA, pinB, 0});
 }
 
-Encoder::Channel* Encoder::findChannel(uint32_t gpio) {
+EncoderDrive::Channel* EncoderDrive::findChannel(uint32_t gpio) {
     if(!instance) {
         return nullptr;
     }
@@ -35,7 +36,7 @@ Encoder::Channel* Encoder::findChannel(uint32_t gpio) {
     return &instance->channels[index];
 }
 
-void Encoder::init() {
+void EncoderDrive::init() {
     middleware.subscribe([this](const core::Message& msg) {
         if(msg.compareTopic(core::Topics::READ_SPEED)) {
             auto& readSpeedMsg = static_cast<const core::ReadSpeedMessage&>(msg);
@@ -60,12 +61,12 @@ void Encoder::init() {
         hal::Gpio::pullUp(channel.pinA);
         hal::Gpio::pullUp(channel.pinB);
 
-        hal::Gpio::setExternalInterrupt(channel.pinA, true, true, &Encoder::pulseCallback);
+        hal::Gpio::setExternalInterrupt(channel.pinA, true, true, &EncoderDrive::pulseCallback);
         channelByPin[channel.pinA] = i;
     }
 }
 
-void Encoder::readSpeed(uint8_t id, double& speed) {
+void EncoderDrive::readSpeed(uint8_t id, double& speed) {
     if(channels.empty()) {
         speed = 0.0;
         return;
@@ -74,7 +75,7 @@ void Encoder::readSpeed(uint8_t id, double& speed) {
     //speed = static_cast<double>(channels[id].pulseCount);
 }
 
-void Encoder::pulseCallback(uint32_t gpio, uint32_t event) {
+void EncoderDrive::pulseCallback(uint32_t gpio, uint32_t event) {
     if(!instance) {
         return;
     }
