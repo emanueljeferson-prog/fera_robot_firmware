@@ -1,6 +1,7 @@
 add_library(hal
     gpio.cpp
     pwm.cpp
+    uart.cpp
 )
 
 target_include_directories(hal PUBLIC
@@ -8,7 +9,7 @@ target_include_directories(hal PUBLIC
 )
 
 target_link_libraries(hal
-    #pico_stdlib
-    #hardware_spi
-    #hardware_gpio
+    pico_stdlib
+    hardware_spi
+    hardware_gpio
 )
