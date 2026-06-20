@@ -4,35 +4,59 @@ namespace app {
 
 Imu::Imu(core::IMiddleware& middleware)
 : middleware(middleware) {
-    std::cout << "[APP] [IMU] [START]" << std::endl;
+    logger::info("[APP] [IMU] [START]");
 }
 
 void Imu::init() {
-
+    auto register_task_imu_msg = core::RegisterTask(
+        core::TaskDescription{
+            .task_name = "imu",
+            .stack_size = 1024,
+            .priority = 2,
+            .task = &Imu::readImuWrapper,
+            .parameters = this
+        },
+        core::Topics::REGISTER_TASK
+    );
+    
+    middleware.publish(register_task_imu_msg);
+    logger::info("[APP] [IMU] [INIT]");
 }
 
 void Imu::readImu() {
-    std::vector<uint8_t> accelRaw(6, 0);
-    std::vector<uint8_t> gyroRaw(6, 0);
-    std::vector<uint8_t> magRaw(6, 0);
-    std::vector<uint8_t> tempRaw(2, 0);
+    std::vector<double> _accel(3);
+    std::vector<double> _gyro(3);
+    std::vector<double> _mag(3);
+    std::vector<double> _temp(1);
 
-    auto get_accel_msg = core::ExternMessageReceive(accelRaw, core::ProtocolType::SPI, 0x3B, core::Topics::EXTERN_MESSAGE_SEND);
-    auto get_gyro_msg = core::ExternMessageReceive(gyroRaw, core::ProtocolType::SPI, 0x46, core::Topics::EXTERN_MESSAGE_SEND);
-    auto get_mag_msg = core::ExternMessageReceive(magRaw, core::ProtocolType::I2C, 0x0C, core::Topics::EXTERN_MESSAGE_SEND);
-    auto get_temp_msg = core::ExternMessageReceive(tempRaw, core::ProtocolType::SPI, 0x41, core::Topics::EXTERN_MESSAGE_SEND);
+    auto get_imu_data_msg = core::ReadImuMessage(_accel, _gyro, _mag, _temp, core::Topics::READ_IMU);
+    middleware.publish(get_imu_data_msg);
 
-    middleware.publish(get_accel_msg);
-    middleware.publish(get_gyro_msg);
-    middleware.publish(get_mag_msg);
-    middleware.publish(get_temp_msg);
-    //accel = 
+    accel.x = _accel[0];
+    accel.y = _accel[1];
+    accel.z = _accel[2];
+    gyro.x = _gyro[0];
+    gyro.y = _gyro[1];
+    gyro.z = _gyro[2];
+    mag.x = _mag[0];
+    mag.y = _mag[1];
+    mag.z = _mag[2];
+    temp = _temp[0];
 
-    //std::cout << "[APP] [ACCEL]" << "[x, y, z]: " << (int) << std::endl;
+    logger::info("[APP] [ACCEL] [x, y, z]: " + std::to_string(accel.x) + ", " + std::to_string(accel.y) + ", " + std::to_string(accel.z));
+    logger::info("[APP] [GYRO] [x, y, z]: " + std::to_string(gyro.x) + ", " + std::to_string(gyro.y) + ", " + std::to_string(gyro.z));
+    logger::info("[APP] [MAG] [x, y, z]: " + std::to_string(mag.x) + ", " + std::to_string(mag.y) + ", " + std::to_string(mag.z));
+    logger::info("[APP] [TEMP] [º]: " + std::to_string(temp));
 }
 
 void Imu::readImuWrapper(void* params) {
-
+    Imu* imu = static_cast<Imu*>(params);
+    for(;;) {
+        imu->readImu();
+        /*auto delay_msg = core::DelayTask(1000, core::Topics::DELAY_TASK);
+        imu->middleware.publish(delay_msg);*/
+        sleep_ms(1000);
+    }
 }
 
 }

@@ -6,6 +6,12 @@
 
 namespace app {
 
+struct Vector3D {
+    double x;
+    double y;
+    double z;
+};    
+
 class Imu: public IApplication {
 public:
     Imu(core::IMiddleware& middleware); 
@@ -13,9 +19,10 @@ public:
     void readImu();
     static void readImuWrapper(void* params);
 private:    
-    std::vector<uint16_t> accel; 
-    std::vector<uint16_t> gyro; 
-    std::vector<uint16_t> mag; 
+    Vector3D accel; 
+    Vector3D gyro; 
+    Vector3D mag; 
+    double temp;
     core::IMiddleware& middleware;
 };
 
