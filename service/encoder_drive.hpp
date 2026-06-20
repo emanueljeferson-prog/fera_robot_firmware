@@ -13,7 +13,7 @@ public:
     void init() override;
     void readSpeed(uint8_t id, double& speed);
     void registerEncoderDrive(uint8_t pinA, uint8_t pinB);
-    static void pulseCallback(uint32_t gpio, uint32_t event);
+    static void pulseCallback(unsigned int gpio, long unsigned int event);
 
 private:
     struct Channel {
