@@ -1,5 +1,8 @@
+#pragma once
 #include "core/middleware.hpp"
-#include <iostream>
+#include "pico/stdlib.h"
+#include "pico/stdlib.h"
+#include "logger/logger.hpp"
 
 namespace app { 
 

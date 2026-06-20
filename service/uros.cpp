@@ -2,6 +2,7 @@
 #include "config.hpp"
 #include "uroslib/pico_uart_transports.h"
 #include <pico/stdlib.h>
+#include "logger/logger.hpp"
 
 namespace service {
 
@@ -11,7 +12,7 @@ MicroRos::MicroRos(core::IMiddleware& middleware):
 {
     speed_cmd = new robot_interfaces__msg__SpeedCmd();
     sensor_data = new robot_interfaces__msg__SensorData();
-    std::cout << "[SERVICE] [MICROS ROS] [START]" << std::endl;
+    logger::info("[SERVICE] [MICROS ROS] [START]");
 }
 
 MicroRos::~MicroRos() {
@@ -25,12 +26,12 @@ void MicroRos::init() {
     auto timer_callback = [this](rcl_timer_t *timer, int64_t last_call_time) {
         if(fms.checkFinish()) {
             microros.publish(*sensor_data);
-            std::cout << "[SERVICE] [MICROS ROS] [PUBLISH]" << std::endl;
+            logger::info("[SERVICE] [MICROS ROS] [PUBLISH]");
         } 
     };
     auto subscription_callback = [this](const void* message) {
         *speed_cmd = *(robot_interfaces__msg__SpeedCmd*)(message);
-        printf("ref motor1: %f ----------- ref motor2: %f", speed_cmd->motor_01, speed_cmd->motor_02);
+        //printf("ref motor1: %f ----------- ref motor2: %f", speed_cmd->motor_01, speed_cmd->motor_02);
     };
     auto register_spin_msg = core::RegisterTask(
         core::TaskDescription{
@@ -74,7 +75,7 @@ void MicroRos::init() {
                 fms.update(core::Topics::UROS_IMU);
             }
         },
-        core::Topics::UROS_SPEED,
+        core::Topics::UROS_IMU,
         false
     );
     middleware.subscribe(
@@ -89,7 +90,7 @@ void MicroRos::init() {
                 fms.update(core::Topics::UROS_GPS);
             }
         },
-        core::Topics::UROS_SPEED,
+        core::Topics::UROS_GPS,
         false
     );
 }
@@ -139,7 +140,7 @@ void StateMachine::update(core::Topics tp) {
 bool StateMachine::checkFinish() {
     const bool finished = state == States::FINISH; 
     reset();
-    return true;    
+    return finished;    
 }
 
 void StateMachine::reset() {

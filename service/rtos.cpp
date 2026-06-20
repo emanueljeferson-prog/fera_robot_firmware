@@ -2,14 +2,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
-#include <iostream>
+#include "logger/logger.hpp"
 
 namespace service {
 
 Rtos::Rtos(core::IMiddleware& middleware) 
 : middleware(middleware) {
     tickStartTime = xTaskGetTickCount();
-    std::cout << "[SERVICE] [RTOS] [START]" << std::endl;
+    logger::info("[SERVICE] [RTOS] [START]");
 }
 
 void Rtos::init() {
@@ -23,7 +23,7 @@ void Rtos::init() {
         core::Topics::REGISTER_TASK,
         true
     );
-    middleware.subscribe(
+    /*middleware.subscribe(
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::DELAY_TASK)) {
                 const auto& delay_msg = static_cast<const core::DelayTask&>(msg);
@@ -32,11 +32,11 @@ void Rtos::init() {
         }, 
         core::Topics::DELAY_TASK,
         false
-    );
+    );*/
 }
 
 void Rtos::createTask(const core::TaskDescription desc) {
-    std::cout << "[SERVICE] [RTOS] [TASK CREATED]: " << desc.task_name << std::endl;
+    logger::info("[SERVICE] [RTOS] [TASK CREATED]: " + desc.task_name);
     xTaskCreate(
         desc.task,
         desc.task_name.c_str(),

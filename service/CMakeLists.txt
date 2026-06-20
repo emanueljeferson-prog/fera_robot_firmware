@@ -4,7 +4,9 @@ add_library(service
     rtos.cpp
     encoder_drive.cpp
     motor_drive.cpp
+    imu_drive.cpp
     uros.cpp
+    comm.cpp
 )
 
 target_link_libraries(service PUBLIC
@@ -13,10 +15,13 @@ target_link_libraries(service PUBLIC
     hardware_gpio
     micro_ros
     FreeRTOS-Kernel-Heap4
+    hal
+    logger
 )
 
 target_include_directories(service PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/..
     ${CMAKE_CURRENT_SOURCE_DIR}/rtos 
     ${CMAKE_CURRENT_SOURCE_DIR}/uroslib/

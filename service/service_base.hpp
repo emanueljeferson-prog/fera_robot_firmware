@@ -1,7 +1,6 @@
 #pragma once 
 
 #include "core/middleware.hpp"
-#include <iostream>
 
 namespace service {
 

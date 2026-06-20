@@ -1,10 +1,10 @@
-#include <iostream>
 #include "middleware.hpp"
+#include "logger/logger.hpp"
 
 namespace core {
 
 Middleware::Middleware() {
-    std::cout << "[CORE] [MIDDLEWARE] [START]" << std::endl;
+    logger::info("[CORE] [MIDDLEWARE] [START]");
 }
 
 void Middleware::subscribe(Callback cb, const Topics tp, bool delete_flag) {

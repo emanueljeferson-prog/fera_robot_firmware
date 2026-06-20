@@ -8,6 +8,12 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(DEBUG "Enable debug logging" OFF)
+if(DEBUG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG)
+    message(STATUS "Building with DEBUG enabled")
+endif()
+
 if(WIN32)
     set(USERHOME $ENV{USERPROFILE})
 else()
@@ -29,13 +35,15 @@ add_executable(firmware
     firmware.cpp
 )
 
+add_subdirectory(logger)
 add_subdirectory(core)
 add_subdirectory(application)
-add_subdirectory(service)
 add_subdirectory(hal)
+add_subdirectory(service)
 
 target_link_libraries(firmware
     pico_stdlib
+    logger
     core
     app
     service

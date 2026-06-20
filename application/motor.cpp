@@ -1,11 +1,10 @@
 #include "motor.hpp"
-#include <iostream>
 
 namespace app {
 
 Motor::Motor(uint8_t id, core::IMiddleware& middleware)
 : id(id), middleware(middleware), speed(0.0) {
-    std::cout << "[APP] [MOTOR: " << (int)id << "] [START]" << std::endl;
+    logger::info("[APP] [MOTOR: " + std::to_string((int)id) + "] [START]");
 } 
 
 void Motor::init() {
@@ -29,16 +28,15 @@ void Motor::init() {
         },
         core::Topics::REGISTER_TASK
     );
-    
     middleware.publish(register_task_command_msg);
     middleware.publish(register_task_speed_msg);
-    std::cout << "[APP] [MOTOR: " << (int)id << "] [INIT]" << std::endl;
+    logger::info("[APP] [MOTOR: " + std::to_string((int)id) + "] [INIT]");
 }
 
 void Motor::control() {
     auto command_msg = core::MotorCommandMessage(id, -1000, core::Topics::MOTOR_COMMAND);
     middleware.publish(command_msg);
-    std::cout << "[APP] [MOTOR: " << (int)id << "] [CONTROL TASK]" << std::endl;
+    logger::info("[APP] [MOTOR: " + std::to_string((int)id) + "] [CONTROL TASK]");
 }
 
 void Motor::readSpeed() {
@@ -46,15 +44,16 @@ void Motor::readSpeed() {
     middleware.publish(read_speed_msg);
     auto uros_speed_msg = core::MicroRosMessageSpeed(speed, 0.55, core::Topics::UROS_SPEED); 
     middleware.publish(uros_speed_msg);
-    std::cout << "[APP] [MOTOR: " << (int)id << "] [READ SPEED TASK]: " << speed << std::endl;
+    logger::info("[APP] [MOTOR: " + std::to_string((int)id) + "] [READ SPEED TASK]: " + std::to_string(speed));
 }
 
 void Motor::controlWrapper(void* params) {
     Motor* motor = static_cast<Motor*>(params);
     for(;;) {
         motor->control();
-        auto delay_msg = core::DelayTask(1000, core::Topics::DELAY_TASK);
-        motor->middleware.publish(delay_msg);
+        /*auto delay_msg = core::DelayTask(1000, core::Topics::DELAY_TASK);
+        motor->middleware.publish(delay_msg);*/
+        sleep_ms(1000);
     }
 }
 
@@ -62,8 +61,9 @@ void Motor::readSpeedWrapper(void* params) {
     Motor* motor = static_cast<Motor*>(params);
     for(;;) {
         motor->readSpeed();
-        auto delay_msg = core::DelayTask(1000, core::Topics::DELAY_TASK);
-        motor->middleware.publish(delay_msg);
+        /*auto delay_msg = core::DelayTask(1000, core::Topics::DELAY_TASK);
+        motor->middleware.publish(delay_msg);*/
+        sleep_ms(1000);
     }
 }
 

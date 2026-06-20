@@ -1,12 +1,12 @@
 #include "motor_drive.hpp"
-#include <iostream>
+#include "logger/logger.hpp"
 
 namespace service {
 
 MotorDrive::MotorDrive(core::IMiddleware& middleware)
 : middleware(middleware) {
     channels.clear();
-    std::cout << "[SERVICE] [MOTOR DRIVE] [START]" << std::endl;
+    logger::info("[SERVICE] [MOTOR DRIVE] [START]");
 }
 
 void MotorDrive::registerMotor(uint8_t pinA, uint8_t pinB) {
@@ -29,6 +29,7 @@ void MotorDrive::init() {
         channel.pwmA.init();
         channel.pwmB.init();
     }
+    logger::info("[SERVICE] [MOTOR DRIVE] [INIT]");
 }
 
 void MotorDrive::move(uint8_t id, int16_t signal) {

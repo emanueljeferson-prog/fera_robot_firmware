@@ -71,6 +71,16 @@ public:
     const uint32_t delay;
 };
 
+struct ReadImuMessage: public Message {
+public:
+    ReadImuMessage(std::vector<double>& accel, std::vector<double>& gyro, std::vector<double>& mag, std::vector<double>& temp, const Topics tp)
+    : accel(accel), gyro(gyro), mag(mag), temp(temp), Message(tp) {}
+    std::vector<double>& accel;
+    std::vector<double>& gyro;
+    std::vector<double>& mag;
+    std::vector<double>& temp; 
+};
+
 struct ReadSpeedMessage: public Message {
 public:
     ReadSpeedMessage(const uint8_t id, double& speed, const Topics tp)
@@ -97,12 +107,12 @@ public:
 
 struct MicroRosMessageImu: public Message {
 public:
-    MicroRosMessageImu(std::vector<int16_t> accel, std::vector<int16_t> gyro, std::vector<int16_t> mag, const int16_t temp, const Topics tp)
+    MicroRosMessageImu(std::vector<double> accel, std::vector<double> gyro, std::vector<double> mag, const double temp, const Topics tp)
     : accel(std::move(accel)), gyro(std::move(gyro)), mag(std::move(mag)), temp(temp), Message(tp) {}
-    std::vector<int16_t> accel;
-    std::vector<int16_t> gyro;
-    std::vector<int16_t> mag;
-    const uint16_t temp; 
+    std::vector<double> accel;
+    std::vector<double> gyro;
+    std::vector<double> mag;
+    const double temp; 
 };
 
 struct MicroRosMessageGps: public Message {
@@ -118,18 +128,20 @@ public:
 
 struct ExternMessageSend: public Message {
 public: 
-    ExternMessageSend(const std::vector<uint8_t> payload, const ProtocolType protocol, const uint8_t address, const Topics tp) 
-    : payload(std::move(payload)), protocol(protocol), address(address), Message(tp){}
+    ExternMessageSend(const std::vector<uint8_t> payload, const size_t lenght, const ProtocolType protocol, const uint8_t address, const Topics tp) 
+    : payload(std::move(payload)), lenght(lenght), protocol(protocol), address(address), Message(tp){}
     const std::vector<uint8_t> payload;
+    const size_t lenght;
     const ProtocolType protocol;
     const uint8_t address; 
 };
 
 struct ExternMessageReceive: public Message {
 public: 
-    ExternMessageReceive(std::vector<uint8_t>& payload, const ProtocolType protocol, const uint8_t address, const Topics tp) 
-    : payload(payload), protocol(protocol), address(address), Message(tp){}
+    ExternMessageReceive(std::vector<uint8_t>& payload, const size_t lenght, const ProtocolType protocol, const uint8_t address, const Topics tp) 
+    : payload(payload), lenght(lenght), protocol(protocol), address(address), Message(tp){}
     std::vector<uint8_t>& payload;
+    const size_t lenght;
     const ProtocolType protocol;
     const uint8_t address;
 };

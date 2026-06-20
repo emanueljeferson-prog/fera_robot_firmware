@@ -1,6 +1,6 @@
 #include "encoder_drive.hpp"
 #include "hal/gpio.hpp"
-#include <iostream>
+#include "logger/logger.hpp"
 
 namespace service {
 
@@ -11,7 +11,7 @@ EncoderDrive::EncoderDrive(core::IMiddleware& middleware)
 : middleware(middleware) {
     channels.clear();
     instance = this;
-    std::cout << "[SERVICE] [ENCODER DRIVE] [START]" << std::endl;
+    logger::info("[SERVICE] [ENCODER DRIVE] [START]");
 }
 
 void EncoderDrive::registerEncoderDrive(uint8_t pinA, uint8_t pinB) {
@@ -71,11 +71,12 @@ void EncoderDrive::readSpeed(uint8_t id, double& speed) {
         speed = 0.0;
         return;
     }
-    speed = 42.5;
-    //speed = static_cast<double>(channels[id].pulseCount);
+    //speed = 42.5;
+    logger::info("[SERVICE] [ENCODER DRIVE] [READ SPEED]: " + std::to_string(channels[id].pulseCount));
+    speed = static_cast<double>(channels[id].pulseCount);
 }
 
-void EncoderDrive::pulseCallback(uint32_t gpio, uint32_t event) {
+void EncoderDrive::pulseCallback(unsigned int gpio, long unsigned int event) {
     if(!instance) {
         return;
     }

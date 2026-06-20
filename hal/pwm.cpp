@@ -1,7 +1,7 @@
 #include "pwm.hpp"
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
+#include "logger/logger.hpp"
 //#include <hardware/pwm.h>
 //#include <hardware/gpio.h>
 
@@ -21,7 +21,7 @@ void Pwm::init() {
 
 void Pwm::writePwm(uint16_t pwm) {
     //pwm_set_chan_level(slice_num, chann, pwm);
-    std::cout << "[HAL] [PWM: " << (int)pin << "] [WRITE PWM]: " << pwm << std::endl;
+    logger::info("[HAL] [PWM: " + std::to_string((int)pin) + "] [WRITE PWM]: " + std::to_string(pwm));
 }
 
 }
