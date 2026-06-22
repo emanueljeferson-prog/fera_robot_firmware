@@ -1,7 +1,6 @@
 #pragma once 
 
 #include <cstdint>
-#include <string>
 #include <vector>
 #include <functional>
 
@@ -17,13 +16,12 @@ enum Topics {
     READ_SPEED,
     READ_IMU,
     READ_GPS,
-    REGISTER_TASK,
-    DELAY_TASK,
     UROS_SPEED,
     UROS_CMD,
     UROS_IMU,
     UROS_GPS,
-    EXTERN_MESSAGE_SEND
+    EXTERN_MESSAGE_SEND,
+    EXTERN_MESSAGE_RECEIVE
 };
 
 enum ProtocolType {
@@ -38,10 +36,32 @@ enum ProtocolType {
     ETHERNET
 };
 
+struct Vector3D {
+    double x;
+    double y;
+    double z;
+    
+    Vector3D() : x(0), y(0), z(0) {}
+    Vector3D(double x, double y, double z) : x(x), y(y), z(z) {}
+    Vector3D(const Vector3D& other) : x(other.x), y(other.y), z(other.z) {}
+    
+    Vector3D& operator=(const Vector3D& other) {
+        if (this != &other) {
+            x = other.x;
+            y = other.y;
+            z = other.z;
+        }
+        return *this;
+    }
+    
+    // Conversão automática para geometry_msgs__msg__Point (definida em uros)
+    operator struct geometry_msgs__msg__Point() const;
+};   
+
 struct TaskDescription {
-    std::string task_name;
+    const char* task_name;
     uint16_t stack_size;
-    uint8_t priority;
+    uint32_t priority;
     TaskFunction task;
     void* parameters;
 };
@@ -57,68 +77,54 @@ private:
     const Topics topic;
 };
 
-struct RegisterTask: public Message {
-public:
-    RegisterTask(const TaskDescription& desc, const Topics tp)
-    : desc(desc), Message(tp) {}
-    const TaskDescription desc;
-};
-
-struct DelayTask: public Message {
-public:
-    DelayTask(const uint32_t delay, const Topics tp)
-    : delay(delay), Message(tp) {}
-    const uint32_t delay;
-};
-
 struct ReadImuMessage: public Message {
 public:
-    ReadImuMessage(std::vector<double>& accel, std::vector<double>& gyro, std::vector<double>& mag, std::vector<double>& temp, const Topics tp)
-    : accel(accel), gyro(gyro), mag(mag), temp(temp), Message(tp) {}
-    std::vector<double>& accel;
-    std::vector<double>& gyro;
-    std::vector<double>& mag;
-    std::vector<double>& temp; 
+    ReadImuMessage(Vector3D& accel, Vector3D& gyro, Vector3D& mag, double& temp)
+    : accel(accel), gyro(gyro), mag(mag), temp(temp), Message(Topics::READ_IMU) {}
+    Vector3D& accel;
+    Vector3D& gyro;
+    Vector3D& mag;
+    double& temp; 
 };
 
 struct ReadSpeedMessage: public Message {
 public:
-    ReadSpeedMessage(const uint8_t id, double& speed, const Topics tp)
-    : id(id), speed(speed), Message(tp) {}
+    ReadSpeedMessage(const uint8_t id, double& speed)
+    : id(id), speed(speed), Message(Topics::READ_SPEED) {}
     const uint8_t id;
     double& speed;
 };
 
 struct MotorCommandMessage: public Message {
 public: 
-    MotorCommandMessage(const uint8_t id, const int16_t signal, const Topics tp)
-    : id(id), signal(signal), Message(tp) {}
+    MotorCommandMessage(const uint8_t id, const int16_t signal)
+    : id(id), signal(signal), Message(Topics::MOTOR_COMMAND) {}
     const uint8_t id;
     const int16_t signal;
 };   
 
 struct MicroRosMessageSpeed: public Message {
 public:
-    MicroRosMessageSpeed(const double speed_1, const double speed_2, const Topics tp)
-    : speed_1(speed_1), speed_2(speed_2), Message(tp) {}
+    MicroRosMessageSpeed(const double speed_1, const double speed_2)
+    : speed_1(speed_1), speed_2(speed_2), Message(Topics::UROS_SPEED) {}
     const double speed_1;
     const double speed_2;
 };
 
 struct MicroRosMessageImu: public Message {
 public:
-    MicroRosMessageImu(std::vector<double> accel, std::vector<double> gyro, std::vector<double> mag, const double temp, const Topics tp)
-    : accel(std::move(accel)), gyro(std::move(gyro)), mag(std::move(mag)), temp(temp), Message(tp) {}
-    std::vector<double> accel;
-    std::vector<double> gyro;
-    std::vector<double> mag;
+    MicroRosMessageImu(const Vector3D accel, const Vector3D gyro, const Vector3D mag, const double temp)
+    : accel(std::move(accel)), gyro(std::move(gyro)), mag(std::move(mag)), temp(temp), Message(Topics::UROS_IMU) {}
+    const Vector3D accel;
+    const Vector3D gyro;
+    const Vector3D mag;
     const double temp; 
 };
 
 struct MicroRosMessageGps: public Message {
 public:
-    MicroRosMessageGps(const double latitude, const double longitude, const double altitude, const uint32_t seconds, const uint32_t nanoseconds, const Topics tp)
-    : latitude(latitude), longitude(longitude), altitude(altitude), seconds(seconds), nanoseconds(nanoseconds), Message(tp) {}
+    MicroRosMessageGps(const double latitude, const double longitude, const double altitude, const uint32_t seconds, const uint32_t nanoseconds)
+    : latitude(latitude), longitude(longitude), altitude(altitude), seconds(seconds), nanoseconds(nanoseconds), Message(Topics::UROS_GPS) {}
     const double latitude;
     const double longitude;
     const double altitude;
@@ -128,8 +134,8 @@ public:
 
 struct ExternMessageSend: public Message {
 public: 
-    ExternMessageSend(const std::vector<uint8_t> payload, const size_t lenght, const ProtocolType protocol, const uint8_t address, const Topics tp) 
-    : payload(std::move(payload)), lenght(lenght), protocol(protocol), address(address), Message(tp){}
+    ExternMessageSend(const std::vector<uint8_t> payload, const size_t lenght, const ProtocolType protocol, const uint8_t address) 
+    : payload(std::move(payload)), lenght(lenght), protocol(protocol), address(address), Message(Topics::EXTERN_MESSAGE_SEND){}
     const std::vector<uint8_t> payload;
     const size_t lenght;
     const ProtocolType protocol;
@@ -138,8 +144,8 @@ public:
 
 struct ExternMessageReceive: public Message {
 public: 
-    ExternMessageReceive(std::vector<uint8_t>& payload, const size_t lenght, const ProtocolType protocol, const uint8_t address, const Topics tp) 
-    : payload(payload), lenght(lenght), protocol(protocol), address(address), Message(tp){}
+    ExternMessageReceive(std::vector<uint8_t>& payload, const size_t lenght, const ProtocolType protocol, const uint8_t address) 
+    : payload(payload), lenght(lenght), protocol(protocol), address(address), Message(Topics::EXTERN_MESSAGE_RECEIVE){}
     std::vector<uint8_t>& payload;
     const size_t lenght;
     const ProtocolType protocol;
