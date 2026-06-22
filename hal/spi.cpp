@@ -8,7 +8,7 @@
 namespace hal {
 
 Spi::Spi(const SPI_TYPE spi_type) {
-    logger::info("[HAL] [SPI] [START]");
+    //LOG_INFO("[HAL] [SPI] [START]");
     if (spi_type == SPI_TYPE::SPI0) {
         config.spi_port = spi0;
     } 
@@ -48,7 +48,7 @@ void Spi::chipDeselect() {
     asm volatile("nop \n nop \n nop");
 }
 void Spi::readRegister(uint8_t reg, std::vector<uint8_t>& buffer, const size_t lenght) {
-    logger::info("[HAL] [SPI] [READ REGISTER: " + std::to_string((int)reg) + "]");
+    //LOG_INFO("[HAL] [SPI] [READ REGISTER: " + std::to_string((int)reg) + "]");
     buffer.assign(lenght, 0);
     reg |= config.read_bit;
     chipSelect();
@@ -59,7 +59,7 @@ void Spi::readRegister(uint8_t reg, std::vector<uint8_t>& buffer, const size_t l
     sleep_ms(10);
 }
 void Spi::reset() {
-    logger::info("[HAL] [SPI] [RESET SPI]");
+    //LOG_INFO("[HAL] [SPI] [RESET SPI]");
     uint8_t buf[] = {0x6B, 0x00};
     chipSelect();
     spi_write_blocking(config.spi_port, buf, 2);

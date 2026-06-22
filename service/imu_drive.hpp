@@ -11,10 +11,12 @@ class ImuDrive : public IService {
 public:
     ImuDrive(core::IMiddleware& middleware);
     void init() override;
-    void readImu(std::vector<double>& accel, std::vector<double>& gyro, std::vector<double>& mag, std::vector<double>& temp);
+    //void initMpu6050();
+    //void initLsm303();
+    void readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector3D& mag, double& temp);
 private:
     core::IMiddleware& middleware;
-    hal::I2c i2c;
+    hal::I2c acell_giro_device;
 };
 
 }

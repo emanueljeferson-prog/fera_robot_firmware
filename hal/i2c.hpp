@@ -12,11 +12,14 @@ struct I2cConfig
     uint8_t address;
     uint8_t sda;
     uint8_t scl;
+    uint32_t baudrate;
+    uint8_t who_ami_reg;
 };
 
 class I2c {
 public:
     I2c();
+    void init(const I2cConfig& config);
     void readRegister(const uint8_t reg, std::vector<uint8_t>& buffer, const size_t lenght);
     void readRegister(const uint8_t address, const uint8_t reg, std::vector<uint8_t>& buffer, const size_t lenght);
     void writeRegister(const uint8_t address, const uint8_t reg, const std::vector<uint8_t>& data);

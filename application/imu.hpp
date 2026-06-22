@@ -4,13 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace app {
-
-struct Vector3D {
-    double x;
-    double y;
-    double z;
-};    
+namespace app { 
 
 class Imu: public IApplication {
 public:
@@ -19,9 +13,9 @@ public:
     void readImu();
     static void readImuWrapper(void* params);
 private:    
-    Vector3D accel; 
-    Vector3D gyro; 
-    Vector3D mag; 
+    core::Vector3D accel; 
+    core::Vector3D gyro; 
+    core::Vector3D mag; 
     double temp;
     core::IMiddleware& middleware;
 };

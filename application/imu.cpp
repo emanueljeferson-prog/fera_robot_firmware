@@ -4,58 +4,53 @@ namespace app {
 
 Imu::Imu(core::IMiddleware& middleware)
 : middleware(middleware) {
-    logger::info("[APP] [IMU] [START]");
+    LOG_INFO("[APP] [IMU] [START]");
 }
 
 void Imu::init() {
-    auto register_task_imu_msg = core::RegisterTask(
+    LOG_INFO("[APP] [IMU] [INIT]");
+    auto desc_imu_task = 
         core::TaskDescription{
-            .task_name = "imu",
-            .stack_size = 1024,
-            .priority = 2,
+            .task_name = "imu_task",
+            .stack_size = config::TaskConfig::imuTaskStackSize,
+            .priority = config::TaskConfig::imuTaskPriority,
             .task = &Imu::readImuWrapper,
             .parameters = this
-        },
-        core::Topics::REGISTER_TASK
-    );
-    
-    middleware.publish(register_task_imu_msg);
-    logger::info("[APP] [IMU] [INIT]");
+        };
+    middleware.enqueueTask(desc_imu_task);
+    LOG_INFO("[APP] [IMU] [INIT] [DONE]");
 }
 
 void Imu::readImu() {
-    std::vector<double> _accel(3);
-    std::vector<double> _gyro(3);
-    std::vector<double> _mag(3);
-    std::vector<double> _temp(1);
+    core::Vector3D _accel;
+    core::Vector3D _gyro;
+    core::Vector3D _mag;
+    double _temp;
 
-    auto get_imu_data_msg = core::ReadImuMessage(_accel, _gyro, _mag, _temp, core::Topics::READ_IMU);
+    auto get_imu_data_msg = core::ReadImuMessage(_accel, _gyro, _mag, _temp);
     middleware.publish(get_imu_data_msg);
 
-    accel.x = _accel[0];
-    accel.y = _accel[1];
-    accel.z = _accel[2];
-    gyro.x = _gyro[0];
-    gyro.y = _gyro[1];
-    gyro.z = _gyro[2];
-    mag.x = _mag[0];
-    mag.y = _mag[1];
-    mag.z = _mag[2];
-    temp = _temp[0];
+    accel = _accel;
+    gyro = _gyro;
+    mag = _mag;
+    temp = _temp;
 
-    logger::info("[APP] [ACCEL] [x, y, z]: " + std::to_string(accel.x) + ", " + std::to_string(accel.y) + ", " + std::to_string(accel.z));
-    logger::info("[APP] [GYRO] [x, y, z]: " + std::to_string(gyro.x) + ", " + std::to_string(gyro.y) + ", " + std::to_string(gyro.z));
-    logger::info("[APP] [MAG] [x, y, z]: " + std::to_string(mag.x) + ", " + std::to_string(mag.y) + ", " + std::to_string(mag.z));
-    logger::info("[APP] [TEMP] [º]: " + std::to_string(temp));
+    LOG_INFO("[APP] [ACCEL] [x, y, z]: %f, %f, %f", accel.x, accel.y, accel.z);
+    LOG_INFO("[APP] [GYRO] [x, y, z]: %f, %f, %f", gyro.x, gyro.y, gyro.z);
+    LOG_INFO("[APP] [MAG] [x, y, z]: %f, %f, %f", mag.x, mag.y, mag.z);
+    LOG_INFO("[APP] [TEMP] [º]: %f", temp);
+
+    auto uros_imu_msg = core::MicroRosMessageImu(accel, gyro, mag, temp);
+    middleware.publish(uros_imu_msg);
 }
 
-void Imu::readImuWrapper(void* params) {
+void Imu::readImuWrapper(void* params)
+{
     Imu* imu = static_cast<Imu*>(params);
-    for(;;) {
+    core::RtosTimer timer;
+    for(;;) {   
         imu->readImu();
-        /*auto delay_msg = core::DelayTask(1000, core::Topics::DELAY_TASK);
-        imu->middleware.publish(delay_msg);*/
-        sleep_ms(1000);
+        timer.delay_ms(config::TaskConfig::imuTaskPeriodMs);
     }
 }
 
