@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <cstdint>
+
 namespace hal {
 
 class Pwm {

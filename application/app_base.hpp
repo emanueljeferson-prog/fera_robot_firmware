@@ -3,6 +3,7 @@
 #include "pico/stdlib.h"
 #include "pico/stdlib.h"
 #include "logger/logger.hpp"
+#include "config.hpp"
 
 namespace app { 
 

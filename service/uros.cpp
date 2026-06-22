@@ -2,7 +2,6 @@
 #include "config.hpp"
 #include "uroslib/pico_uart_transports.h"
 #include <pico/stdlib.h>
-#include "logger/logger.hpp"
 
 namespace service {
 
@@ -10,10 +9,10 @@ MicroRos::MicroRos(core::IMiddleware& middleware):
     microros(config::microRosConfig.node_name, config::microRosConfig.publish_topic, config::microRosConfig.subscribe_topic),
     middleware(middleware)
 {
+    LOG_INFO("[SERVICE] [MICROS ROS] [START]");
     speed_cmd = new robot_interfaces__msg__SpeedCmd();
     sensor_data = new robot_interfaces__msg__SensorData();
-    logger::info("[SERVICE] [MICROS ROS] [START]");
-}
+}    
 
 MicroRos::~MicroRos() {
 
@@ -26,26 +25,26 @@ void MicroRos::init() {
     auto timer_callback = [this](rcl_timer_t *timer, int64_t last_call_time) {
         if(fms.checkFinish()) {
             microros.publish(*sensor_data);
-            logger::info("[SERVICE] [MICROS ROS] [PUBLISH]");
+            LOG_INFO("[SERVICE] [MICROS ROS] [PUBLISH]");
         } 
     };
     auto subscription_callback = [this](const void* message) {
         *speed_cmd = *(robot_interfaces__msg__SpeedCmd*)(message);
-        //printf("ref motor1: %f ----------- ref motor2: %f", speed_cmd->motor_01, speed_cmd->motor_02);
+        //LOG_INFO("[SERVICE] [MICROROS] [SUBSCRIPTION] ref motor1: %f ----------- ref motor2: %f", speed_cmd->motor_01, speed_cmd->motor_02);
     };
-    auto register_spin_msg = core::RegisterTask(
+    auto desc_timer_task = 
         core::TaskDescription{
-            .task_name = "micro_ros",
+            .task_name = "microros_timer",
             .stack_size = 1024,
-            .priority = 2,
+            .priority = config::TaskConfig::urosTaskPriority,
             .task = &MicroRos::spinWrapper,
             .parameters = this
-        },
-        core::Topics::REGISTER_TASK
-    );
+        };
     microros.register_timer_callback(timer_callback);
     microros.register_subscription_callback(subscription_callback);
-    middleware.publish(register_spin_msg);
+    LOG_INFO("[SERVICE] [MICROROS] [REGISTER TASK]: microros_timer");
+    middleware.enqueueTask(desc_timer_task);
+    LOG_INFO("[SERVICE] [MICROROS] [REGISTER TASK] DONE");
     middleware.subscribe(
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::UROS_SPEED)) {
@@ -62,15 +61,9 @@ void MicroRos::init() {
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::UROS_IMU)) {
                 const auto& imu_msg = static_cast<const core::MicroRosMessageImu&>(msg); 
-                sensor_data->accel.x = imu_msg.accel[0]; 
-                sensor_data->accel.y = imu_msg.accel[1]; 
-                sensor_data->accel.z = imu_msg.accel[2]; 
-                sensor_data->gyro.x = imu_msg.gyro[0]; 
-                sensor_data->gyro.y = imu_msg.gyro[1]; 
-                sensor_data->gyro.z = imu_msg.gyro[2]; 
-                sensor_data->mag.x = imu_msg.mag[0]; 
-                sensor_data->mag.y = imu_msg.mag[1]; 
-                sensor_data->mag.z = imu_msg.mag[2]; 
+                sensor_data->accel = imu_msg.accel; 
+                sensor_data->gyro = imu_msg.gyro; 
+                sensor_data->mag = imu_msg.mag; 
                 sensor_data->temperature = imu_msg.temp; 
                 fms.update(core::Topics::UROS_IMU);
             }
@@ -104,6 +97,7 @@ void MicroRos::spin() {
 
 void MicroRos::spinWrapper(void* params) {
     MicroRos* uros = static_cast<MicroRos*>(params);
+    LOG_INFO("[SERVICE] [MICROROS] [SPIN TASK] ENTER");
     uros->spin();
 }
 
@@ -140,7 +134,8 @@ void StateMachine::update(core::Topics tp) {
 bool StateMachine::checkFinish() {
     const bool finished = state == States::FINISH; 
     reset();
-    return finished;    
+    //return finished;
+    return true;    
 }
 
 void StateMachine::reset() {
@@ -148,6 +143,19 @@ void StateMachine::reset() {
     imu_flag = false; 
     gps_flag = false; 
     state = States::INIT; 
+}
+
+}
+
+// Implementação do operador de conversão Vector3D -> geometry_msgs__msg__Point
+namespace core {
+
+Vector3D::operator geometry_msgs__msg__Point() const {
+    geometry_msgs__msg__Point point;
+    point.x = x;
+    point.y = y;
+    point.z = z;
+    return point;
 }
 
 }

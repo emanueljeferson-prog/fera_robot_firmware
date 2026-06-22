@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "core/middleware.hpp"
+#include "logger/logger.hpp"
 
 namespace service {
 

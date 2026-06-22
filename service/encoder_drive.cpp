@@ -1,6 +1,6 @@
 #include "encoder_drive.hpp"
+#include "config.hpp"
 #include "hal/gpio.hpp"
-#include "logger/logger.hpp"
 
 namespace service {
 
@@ -11,7 +11,7 @@ EncoderDrive::EncoderDrive(core::IMiddleware& middleware)
 : middleware(middleware) {
     channels.clear();
     instance = this;
-    logger::info("[SERVICE] [ENCODER DRIVE] [START]");
+    //LOG_INFO("[SERVICE] [ENCODER DRIVE] [START]");
 }
 
 void EncoderDrive::registerEncoderDrive(uint8_t pinA, uint8_t pinB) {
@@ -37,6 +37,7 @@ EncoderDrive::Channel* EncoderDrive::findChannel(uint32_t gpio) {
 }
 
 void EncoderDrive::init() {
+    //LOG_INFO("[SERVICE] [ENCODER DRIVE] [INIT]");
     middleware.subscribe([this](const core::Message& msg) {
         if(msg.compareTopic(core::Topics::READ_SPEED)) {
             auto& readSpeedMsg = static_cast<const core::ReadSpeedMessage&>(msg);
@@ -46,7 +47,10 @@ void EncoderDrive::init() {
     core::Topics::READ_SPEED,
     false
     );
-
+    for(size_t i = 0; i < config::motorCount; ++i) {
+        const auto& motorCfg = config::motorConfigs[i];
+        this->registerEncoderDrive(motorCfg.encoder.pin_a, motorCfg.encoder.pin_b);
+    }
     channelByPin.clear();
 
     for(size_t i = 0; i < channels.size(); ++i) {
@@ -64,6 +68,7 @@ void EncoderDrive::init() {
         hal::Gpio::setExternalInterrupt(channel.pinA, true, true, &EncoderDrive::pulseCallback);
         channelByPin[channel.pinA] = i;
     }
+    //LOG_INFO("[SERVICE] [ENCODER DRIVE] [INIT] [DONE]");
 }
 
 void EncoderDrive::readSpeed(uint8_t id, double& speed) {
@@ -72,7 +77,7 @@ void EncoderDrive::readSpeed(uint8_t id, double& speed) {
         return;
     }
     //speed = 42.5;
-    logger::info("[SERVICE] [ENCODER DRIVE] [READ SPEED]: " + std::to_string(channels[id].pulseCount));
+    //LOG_INFO("[SERVICE] [ENCODER DRIVE] [READ SPEED]: " + std::to_string(channels[id].pulseCount));
     speed = static_cast<double>(channels[id].pulseCount);
 }
 

@@ -16,4 +16,5 @@ target_link_libraries(hal
     hardware_spi
     hardware_i2c
     hardware_gpio
+    hardware_pwm
 )

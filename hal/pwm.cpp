@@ -1,6 +1,8 @@
 #include "pwm.hpp"
 #include <stdio.h>
 #include <stdlib.h>
+#include "pico/stdlib.h"
+#include <string>
 #include "logger/logger.hpp"
 //#include <hardware/pwm.h>
 //#include <hardware/gpio.h>
@@ -17,11 +19,21 @@ void Pwm::init() {
     pwm_set_wrap(slice_num, PWM_WRAP); 
     pwm_set_chan_level(slice_num, chann, 0);
     pwm_set_enabled(slice_num, true);*/
+
+    static bool led_initialized = false;
+    if (!led_initialized) {
+        gpio_init(25);
+        gpio_set_dir(25, GPIO_OUT);
+        led_initialized = true;
+    }
 }
 
 void Pwm::writePwm(uint16_t pwm) {
-    //pwm_set_chan_level(slice_num, chann, pwm);
-    logger::info("[HAL] [PWM: " + std::to_string((int)pin) + "] [WRITE PWM]: " + std::to_string(pwm));
+    LOG_INFO("[HAL] [PWM: %u] [WRITE PWM]: %u", pin, pwm);
+
+    static bool led_state = false;
+    led_state = !led_state;
+    gpio_put(25, led_state ? 1 : 0);
 }
 
 }

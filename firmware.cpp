@@ -1,34 +1,37 @@
-#include <iostream>
-#include "config.hpp"
 #include "core/middleware.hpp"
 #include "application/motor.hpp"
-#include "service/rtos.hpp"
-#include "service/encoder.hpp"
+#include "application/imu.hpp"
+#include "service/encoder_drive.hpp"
 #include "service/motor_drive.hpp"
+#include "service/uros.hpp"
+#include "service/comm.hpp"
+#include "service/imu_drive.hpp"
+#include "logger/logger.hpp"
 
 int main() {
+    stdio_init_all();
+    sleep_ms(5000); // Wait for serial connection to be established
+    LOG_INFO("[APP] [MAIN] [START]");
     auto broker = core::Middleware(); 
-    auto rtos = service::Rtos(broker);
-    auto encoder = service::Encoder(broker);
+    auto encoder_drive = service::EncoderDrive(broker);
+    auto imu_drive = service::ImuDrive(broker);
     auto motor_drive = service::MotorDrive(broker);
+    auto uros = service::MicroRos(broker);
+    //auto comm = service::Communication(broker);  
     auto motor = app::Motor(1, broker);
-
-    for(size_t i = 0; i < config::motorCount; ++i) {
-        const auto& motorCfg = config::motorConfigs[i];
-        encoder.registerEncoder(motorCfg.encoder.pin_a, motorCfg.encoder.pin_b);
-        motor_drive.registerMotor(motorCfg.driver.pin_a, motorCfg.driver.pin_b);
-    }
-
+    auto imu = app::Imu(broker);
+    sleep_ms(5000);
+    
     // services 
-    rtos.init();
-    encoder.init();
+    encoder_drive.init();
     motor_drive.init();
+    imu_drive.init();
+    uros.init();
+    //comm.init();
     // applications
     motor.init();
-    // middleware
-    broker.run();
-
+    imu.init();
     // scheduler
-    rtos.startScheduler();
+    broker.run();
     return 0;
 }

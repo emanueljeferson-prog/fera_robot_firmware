@@ -17,6 +17,8 @@ private:
     const uint8_t id; 
     double speed; 
     core::IMiddleware& middleware;
+    char commandTaskName[16];
+    char speedTaskName[16];
 };
 
 }
