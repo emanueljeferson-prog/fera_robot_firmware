@@ -43,6 +43,7 @@ private:
     core::IMiddleware& middleware;  
     robot_interfaces__msg__SpeedCmd* speed_cmd;
     robot_interfaces__msg__SensorData* sensor_data;
+    robot_interfaces__msg__SystemConfig* system_config;
     SensorDataStatus_t sensor_data_status;
     IMicroRos microros; 
     StateMachine fms;

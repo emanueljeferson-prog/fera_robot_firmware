@@ -6,6 +6,8 @@
 
 namespace config {
 
+bool configured_system_status = false;
+
 struct PolynomialGain {
     double a0;
     double a1;
@@ -22,26 +24,28 @@ struct EncoderDriveConfig {
     uint8_t pin_b;
     uint32_t reduction_factor;
     uint32_t pulses_per_rev;
+    double wheel_radius;
 };
 
-struct MotorDriverConfig {
+struct MotorDriveConfig {
     uint8_t pin_a;
     uint8_t pin_b;
     uint32_t pwm_wrap;
+    int16_t dead_zone_min;
+    int16_t dead_zone_max; 
 };
 
 struct PIDConfig {
-    PolynomialGain kp;
-    PolynomialGain ki;
-    PolynomialGain kd;
-    uint32_t period_ms;
+    double kp;
+    double ki;
+    double kd;
     int32_t out_min;
     int32_t out_max;
 };
 
 struct MotorConfig {
     EncoderDriveConfig encoder;
-    MotorDriverConfig driver;
+    MotorDriveConfig drive;
     PIDConfig pid;
 };
 
@@ -49,6 +53,7 @@ struct MicroRosConfig {
     std::string node_name;
     std::string publish_topic;
     std::string subscribe_topic;
+    std::string system_config;
 };
 
 namespace Mpu6500 {
@@ -90,16 +95,16 @@ namespace Lsm303 {
 namespace ImuConfig {
     static constexpr double GRAVITY = 9.80665; // m/s²
     static constexpr double DEG2RAD = 3.14159265358979323846 / 180.0; // Degrees to radians conversion factor
-    static constexpr double ACCEL_X_OFFSET = 0.0; // g
-    static constexpr double ACCEL_Y_OFFSET = 0.0; // g
-    static constexpr double ACCEL_Z_OFFSET = 0.0; // g
-    static constexpr double GYRO_X_OFFSET = 0.0; // °/s
-    static constexpr double GYRO_Y_OFFSET = 0.0; // °/s
-    static constexpr double GYRO_Z_OFFSET = 0.0; // °/s
-    static constexpr double MAG_X_OFFSET = 0.0; // μT
-    static constexpr double MAG_Y_OFFSET = 0.0; // μT   
-    static constexpr double MAG_Z_OFFSET = 0.0; // μT
-    static constexpr double TEMP_OFFSET = 36.53; // °C
+    static double accel_x_offset = 0.0; // g
+    static double accel_y_offset = 0.0; // g
+    static double accel_z_offset = 0.0; // g
+    static double gyro_x_offset = 0.0; // °/s
+    static double gyro_y_offset = 0.0; // °/s
+    static double gyro_z_offset = 0.0; // °/s
+    static double mag_x_offset = 0.0; // μT
+    static double mag_y_offset = 0.0; // μT
+    static double mag_z_offset = 0.0; // μT
+    static double temp_offset = 0.0; // °C
 }
 
 namespace TaskConfig {
@@ -111,33 +116,30 @@ namespace TaskConfig {
     static constexpr uint16_t motorTaskPriority = 3;
     static constexpr uint16_t urosTaskPriority = 2;
     static constexpr uint16_t stateMachineTaskPriority = 1;
-    static constexpr uint32_t imuTaskPeriodMs = 30;
-    static constexpr uint32_t motorTaskPeriodMs = 30;
-    static constexpr uint32_t urosTaskPeriodMs = 300;
-    static constexpr uint32_t stateMachineTaskPeriodMs = 1000;
+    static uint32_t imuTaskPeriodMs = 30;
+    static uint32_t motorTaskPeriodMs = 30;
+    static uint32_t gpsTaskPeriodMs = 30;
 }
 
-static constexpr std::array<MotorConfig, 2> motorConfigs = {
+static std::array<MotorConfig, 2> motorConfigs = {
     MotorConfig{
-        EncoderDriveConfig{18, 19, 496, 11},
-        MotorDriverConfig{20, 21, 1000},
+        EncoderDriveConfig{18, 19, 496, 11, 0},
+        MotorDriveConfig{20, 21, 1000, 0, 0},
         PIDConfig{
-            PolynomialGain{131.6, 10.01, 0.01, 50.0},
-            PolynomialGain{0.0, 0.0, 0.0, 0.0},
-            PolynomialGain{0.0, 0.0, 0.0, 0.0},
-            10,
+            0,
+            0,
+            0,
             -100,
             100
         }
     },
     MotorConfig{
-        EncoderDriveConfig{16, 17, 496, 11},
-        MotorDriverConfig{22, 23, 1000},
+        EncoderDriveConfig{16, 17, 496, 11, 0},
+        MotorDriveConfig{22, 23, 1000, 0, 0},
         PIDConfig{
-            PolynomialGain{131.6, 10.01, 0.01, 50.0},
-            PolynomialGain{0.0, 0.0, 0.0, 0.0},
-            PolynomialGain{0.0, 0.0, 0.0, 0.0},
-            10,
+            0,
+            0,
+            0,
             -100,
             100
         }
@@ -149,7 +151,8 @@ static constexpr size_t motorCount = motorConfigs.size();
 static const MicroRosConfig microRosConfig {
     "pico_node",
     "sensor_data",
-    "speed_cmd"
+    "speed_cmd",
+    "system_config"
 };
 
 }

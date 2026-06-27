@@ -10,7 +10,7 @@
 
 int main() {
     stdio_init_all();
-    sleep_ms(5000); // Wait for serial connection to be established
+    sleep_ms(1000); // Wait for serial connection to be established
     LOG_INFO("[APP] [MAIN] [START]");
     auto broker = core::Middleware(); 
     auto encoder_drive = service::EncoderDrive(broker);
@@ -20,8 +20,7 @@ int main() {
     //auto comm = service::Communication(broker);  
     auto motor = app::Motor(1, broker);
     auto imu = app::Imu(broker);
-    sleep_ms(5000);
-    
+    while(!config::configured_system_status) {}
     // services 
     encoder_drive.init();
     motor_drive.init();

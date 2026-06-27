@@ -18,7 +18,7 @@ void MotorDrive::init() {
     //LOG_INFO("[SERVICE] [MOTOR DRIVE] [INIT]");
     for(size_t i = 0; i < config::motorCount; ++i) {
         const auto& motorCfg = config::motorConfigs[i];
-        this->registerMotor(motorCfg.driver.pin_a, motorCfg.driver.pin_b);
+        this->registerMotor(motorCfg.drive.pin_a, motorCfg.drive.pin_b);
     }
 
     middleware.subscribe(
