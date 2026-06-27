@@ -6,18 +6,7 @@
 
 namespace config {
 
-bool configured_system_status = false;
-
-struct PolynomialGain {
-    double a0;
-    double a1;
-    double a2;
-    double a3;
-
-    constexpr double evaluate(double x) const {
-        return a0 + a1 * x + a2 * x * x + a3 * x * x * x;
-    }
-};
+inline bool configured_system_status = false;
 
 struct EncoderDriveConfig {
     uint8_t pin_a;
