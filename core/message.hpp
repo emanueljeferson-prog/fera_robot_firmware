@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <cstdint>
+#include <string>
 #include <vector>
 #include <functional>
 
@@ -123,13 +124,9 @@ public:
 
 struct MicroRosMessageGps: public Message {
 public:
-    MicroRosMessageGps(const double latitude, const double longitude, const double altitude, const uint32_t seconds, const uint32_t nanoseconds)
-    : latitude(latitude), longitude(longitude), altitude(altitude), seconds(seconds), nanoseconds(nanoseconds), Message(Topics::UROS_GPS) {}
-    const double latitude;
-    const double longitude;
-    const double altitude;
-    const uint32_t seconds;
-    const uint32_t nanoseconds;
+    MicroRosMessageGps(const std::string gps_data)
+    : gps_data(gps_data), Message(Topics::UROS_GPS) {}
+    const std::string gps_data;
 };
 
 struct ExternMessageSend: public Message {
