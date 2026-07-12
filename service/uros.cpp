@@ -43,9 +43,7 @@ void MicroRos::init() {
         config::motorConfigs[0].drive.dead_zone_min = system_config->dead_zone_min.data;
         config::motorConfigs[0].drive.dead_zone_max = system_config->dead_zone_max.data;
         // Encoder drive parameters
-        config::motorConfigs[0].encoder.reduction_factor = system_config->reduction_factor.data;
-        config::motorConfigs[0].encoder.pulses_per_rev = system_config->pulses_per_rev.data;
-        config::motorConfigs[0].encoder.wheel_radius = system_config->wheel_radius;
+        config::motorConfigs[0].encoder.conversion_factor = system_config->conversion_factor;
         // PID controller parameters 
         config::motorConfigs[0].pid.kp = system_config->kp;
         config::motorConfigs[0].pid.ki = system_config->ki;
