@@ -7,15 +7,14 @@ namespace app {
 
 class Motor: public IApplication {
 public:
-    Motor(uint8_t id, core::IMiddleware& middleware); 
+    Motor(core::IMiddleware& middleware); 
     void init() override;
     void control();
     void readSpeed();
     static void controlWrapper(void* params);
     static void readSpeedWrapper(void* params);
-private:
-    const uint8_t id; 
-    double speed; 
+private: 
+    double speed_01, speed_02; 
     core::IMiddleware& middleware;
     char commandTaskName[16];
     char speedTaskName[16];

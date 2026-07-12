@@ -2,10 +2,10 @@
 
 namespace app {
 
-Motor::Motor(uint8_t id, core::IMiddleware& middleware)
-: id(id), middleware(middleware), speed(0.0) {
-    snprintf(commandTaskName, sizeof(commandTaskName), "motor_command_%u", id);
-    snprintf(speedTaskName, sizeof(speedTaskName), "motor_speed_%u", id);
+Motor::Motor(core::IMiddleware& middleware)
+: middleware(middleware), speed_01(0.0), speed_02(0.0) {
+    snprintf(commandTaskName, sizeof(commandTaskName), "motor_command");
+    snprintf(speedTaskName, sizeof(speedTaskName), "motor_speed");
     LOG_INFO("[APP] [MOTOR: %u] [START] task=%s/%s]", id, commandTaskName, speedTaskName);
 } 
 
@@ -32,17 +32,18 @@ void Motor::init() {
 }
 
 void Motor::control() {
-    auto command_msg = core::MotorCommandMessage(id, -1000);
+    auto command_msg = core::MotorCommandMessage(0,-1000);
     middleware.publish(command_msg);
     LOG_INFO("[APP] [MOTOR: %u] [CONTROL TASK]", id);
 }
 
 void Motor::readSpeed() {
-    auto read_speed_msg = core::ReadSpeedMessage(id, speed);
-    middleware.publish(read_speed_msg);
-    auto uros_speed_msg = core::MicroRosMessageSpeed(speed, 0.55); 
+    auto read_speed_msg_01 = core::ReadSpeedMessage(0, speed_01);
+    auto read_speed_msg_02 = core::ReadSpeedMessage(1, speed_02);
+    middleware.publish(read_speed_msg_01);
+    middleware.publish(read_speed_msg_02);
+    auto uros_speed_msg = core::MicroRosMessageSpeed(speed_01, speed_02); 
     middleware.publish(uros_speed_msg);
-    LOG_INFO("[APP] [MOTOR: %u] [READ SPEED TASK]: %f", id, speed);
 }
 
 void Motor::controlWrapper(void* params) {

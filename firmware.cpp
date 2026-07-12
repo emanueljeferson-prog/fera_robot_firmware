@@ -7,6 +7,7 @@
 #include "service/comm.hpp"
 #include "service/imu_drive.hpp"
 #include "logger/logger.hpp"
+#include "config.hpp"
 
 int main() {
     stdio_init_all();
@@ -18,9 +19,9 @@ int main() {
     auto motor_drive = service::MotorDrive(broker);
     auto uros = service::MicroRos(broker);
     //auto comm = service::Communication(broker);  
-    auto motor = app::Motor(1, broker);
+    auto motor = app::Motor(broker);
     auto imu = app::Imu(broker);
-    while(!config::configured_system_status) {}
+    //while(!config::configured_system_status) {}
     // services 
     encoder_drive.init();
     motor_drive.init();
