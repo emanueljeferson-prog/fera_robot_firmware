@@ -11,9 +11,7 @@ inline bool configured_system_status = false;
 struct EncoderDriveConfig {
     uint8_t pin_a;
     uint8_t pin_b;
-    uint32_t reduction_factor;
-    uint32_t pulses_per_rev;
-    double wheel_radius;
+    double conversion_factor;
 };
 
 struct MotorDriveConfig {
@@ -73,8 +71,16 @@ namespace Mpu6500 {
 }
 
 namespace Lsm303 {
-    static constexpr uint8_t ADDRESS = 0x0C;
+    static constexpr uint8_t ACCEL_ADDRESS = 0x19;
+    static constexpr uint8_t MAG_ADDRESS = 0x1E;
+    static constexpr double ACCEL_SENSITIVITY = 1000.0; // LSB/g for ±2g
     static constexpr double MAG_SENSITIVITY = 0.15; // μT/LSB for 16-bit output
+    static constexpr uint8_t REG_ACCEL_CTRL1 = 0x20;
+    static constexpr uint8_t REG_ACCEL_CTRL4 = 0x23;
+    static constexpr uint8_t REG_ACCEL_OUT_X_L = 0x28;
+    static constexpr uint8_t REG_MAG_CRA = 0x00;
+    static constexpr uint8_t REG_MAG_CRB = 0x01;
+    static constexpr uint8_t REG_MAG_MR = 0x02;
     static constexpr uint8_t REG_MAG_XOUT_H = 0x03;
     static constexpr uint8_t SDA_PIN = 4;
     static constexpr uint8_t SCL_PIN = 5;
@@ -112,7 +118,7 @@ namespace TaskConfig {
 
 static std::array<MotorConfig, 2> motorConfigs = {
     MotorConfig{
-        EncoderDriveConfig{18, 19, 496, 11, 0},
+        EncoderDriveConfig{18, 19, 34.57815},
         MotorDriveConfig{20, 21, 1000, 0, 0},
         PIDConfig{
             0,
@@ -123,7 +129,7 @@ static std::array<MotorConfig, 2> motorConfigs = {
         }
     },
     MotorConfig{
-        EncoderDriveConfig{16, 17, 496, 11, 0},
+        EncoderDriveConfig{16, 17, 34.57815},
         MotorDriveConfig{22, 23, 1000, 0, 0},
         PIDConfig{
             0,
