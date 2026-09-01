@@ -11,7 +11,7 @@ EncoderDrive::EncoderDrive(core::IMiddleware& middleware)
 : middleware(middleware) {
     channels.clear();
     instance = this;
-    //LOG_INFO("[SERVICE] [ENCODER DRIVE] [START]");
+    ////LOG_INFO("[SERVICE] [ENCODER DRIVE] [START]");
 }
 
 void EncoderDrive::registerEncoderDrive(uint8_t pinA, uint8_t pinB) {
@@ -37,7 +37,7 @@ EncoderDrive::Channel* EncoderDrive::findChannel(uint32_t gpio) {
 }
 
 void EncoderDrive::init() {
-    //LOG_INFO("[SERVICE] [ENCODER DRIVE] [INIT]");
+    ////LOG_INFO("[SERVICE] [ENCODER DRIVE] [INIT]");
     middleware.subscribe([this](const core::Message& msg) {
         if(msg.compareTopic(core::Topics::READ_SPEED)) {
             auto& readSpeedMsg = static_cast<const core::ReadSpeedMessage&>(msg);
@@ -68,7 +68,7 @@ void EncoderDrive::init() {
         hal::Gpio::setExternalInterrupt(channel.pinA, true, true, &EncoderDrive::pulseCallback);
         channelByPin[channel.pinA] = i;
     }
-    //LOG_INFO("[SERVICE] [ENCODER DRIVE] [INIT] [DONE]");
+    ////LOG_INFO("[SERVICE] [ENCODER DRIVE] [INIT] [DONE]");
 }
 
 void EncoderDrive::readSpeed(uint8_t id, double& speed) {
@@ -76,9 +76,11 @@ void EncoderDrive::readSpeed(uint8_t id, double& speed) {
         speed = 0.0;
         return;
     }
-    //speed = 42.5;
-    //LOG_INFO("[SERVICE] [ENCODER DRIVE] [READ SPEED]: " + std::to_string(channels[id].pulseCount));
-    speed = static_cast<double>(channels[id].pulseCount);
+    double fc = config::motorConfigs[id].encoder.conversion_factor;
+    double delta_pulses = static_cast<double>(channels[id].pulseCount);
+    double delta_time = static_cast<double>(config::TaskConfig::motorTaskPeriodMs) / 1000.0; // Convert ms to seconds
+    speed = (delta_pulses * fc) / delta_time; // Calculate speed in units per second
+    channels[id].pulseCount = 0; // Reset pulse count after reading
 }
 
 void EncoderDrive::pulseCallback(unsigned int gpio, long unsigned int event) {

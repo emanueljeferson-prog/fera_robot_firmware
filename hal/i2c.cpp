@@ -18,24 +18,30 @@ void I2c::init(const I2cConfig& cfg) {
     Gpio::pullUp(config.sda);
     Gpio::pullUp(config.scl);
     bi_decl(bi_2pins_with_func(config.sda, config.scl, GPIO_FUNC_I2C));
-    reset();
+    if (config.reset_on_init) {
+        reset();
+    } else {
+        sleep_ms(10);
+    }
 }
 
 void I2c::readRegister(uint8_t reg, std::vector<uint8_t>& buffer, const size_t lenght) {
-    //LOG_INFO("[HAL] [i2c] [READ REGISTER: " + std::to_string((int)reg) + "]");
+    LOG_INFO("[HAL] [i2c] [READ REGISTER: " + std::to_string((int)reg) + "]");
     buffer.assign(lenght, 0);
     int w = i2c_write_blocking(config.i2c_port, config.address, &reg, 1, true);
     int r = i2c_read_blocking(config.i2c_port, config.address, buffer.data(), lenght, false);
+    LOG_INFO("[HAL] [i2c] [RESULT] addr=0x%02X reg=0x%02X write=%d read=%d", config.address, reg, w, r);
 }
 
 void I2c::readRegister(const uint8_t address, const uint8_t reg, std::vector<uint8_t>& buffer, const size_t lenght) {
-    //LOG_INFO("[HAL] [i2c] [READ REGISTER: " + std::to_string((int)reg) + " @ 0x" + std::to_string((int)address) + "]");
+    LOG_INFO("[HAL] [i2c] [READ REGISTER: " + std::to_string((int)reg) + " @ 0x" + std::to_string((int)address) + "]");
     buffer.assign(lenght, 0);
     int w = i2c_write_blocking(config.i2c_port, address, &reg, 1, true);
     int r = -1;
     if (w >= 0) {
         r = i2c_read_blocking(config.i2c_port, address, buffer.data(), lenght, false);
     }
+    LOG_INFO("[HAL] [i2c] [RESULT] addr=0x%02X reg=0x%02X write=%d read=%d", address, reg, w, r);
 }
 
 void I2c::writeRegister(const uint8_t address, const uint8_t reg, const std::vector<uint8_t>& data) {
@@ -44,35 +50,36 @@ void I2c::writeRegister(const uint8_t address, const uint8_t reg, const std::vec
     write_buffer.push_back(reg);
     write_buffer.insert(write_buffer.end(), data.begin(), data.end());
     int w = i2c_write_blocking(config.i2c_port, address, write_buffer.data(), write_buffer.size(), false);
-    //LOG_INFO("[HAL] [i2c] [WRITE REGISTER: " + std::to_string((int)reg) + " @ 0x" + std::to_string((int)address) + " bytes=" + std::to_string(w) + "]");
+    LOG_INFO("[HAL] [i2c] [WRITE REGISTER: " + std::to_string((int)reg) + " @ 0x" + std::to_string((int)address) + " bytes=" + std::to_string(w) + "]");
 }
 
 void I2c::writeRegister(const uint8_t address, const uint8_t reg, const uint8_t value) {
     uint8_t write_buffer[2] = { reg, value };
     int w = i2c_write_blocking(config.i2c_port, address, write_buffer, 2, false);
-    //LOG_INFO("[HAL] [i2c] [WRITE REGISTER: " + std::to_string((int)reg) + " @ 0x" + std::to_string((int)address) + " bytes=" + std::to_string(w) + "]");
+    LOG_INFO("[HAL] [i2c] [WRITE REGISTER: " + std::to_string((int)reg) + " @ 0x" + std::to_string((int)address) + " bytes=" + std::to_string(w) + "]");
 }
 
 void I2c::scanBus(const char* label) {
-    //LOG_INFO("[HAL] [i2c] [SCAN] " + std::string(label ? label : ""));
+    LOG_INFO("[HAL] [i2c] [SCAN] " + std::string(label ? label : ""));
     int nDevices = 0;
     for (uint8_t address = 1; address < 0x7F; ++address) {
         uint8_t dummy = 0;
         int result = i2c_read_blocking(config.i2c_port, address, &dummy, 1, false);
         if (result >= 0) {
-            //LOG_INFO("[HAL] [i2c] [I2C device found at address 0x" + std::to_string((int)address) + "]");
+            LOG_INFO("[HAL] [i2c] [I2C device found at address 0x" + std::to_string((int)address) + "]");
+            LOG_INFO("[HAL] [i2c] [I2C device found at address 0x%02X]", address);
             ++nDevices;
         }
     }
     if (nDevices == 0) {
-        //LOG_INFO("[HAL] [i2c] [No I2C devices found]");
+        LOG_INFO("[HAL] [i2c] [No I2C devices found]");
     } else {
-        //LOG_INFO("[HAL] [i2c] [done]");
+        LOG_INFO("[HAL] [i2c] [done]");
     }
 }
 
 void I2c::reset() {
-    //LOG_INFO("[HAL] [i2c] [RESET i2c]");
+    LOG_INFO("[HAL] [i2c] [RESET i2c]");
     uint8_t buf[] = { 0x6B, 0x80 };
     i2c_write_blocking(config.i2c_port, config.address, buf, 2, false);
     sleep_ms(100);

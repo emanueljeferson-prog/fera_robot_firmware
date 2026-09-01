@@ -6,7 +6,7 @@ Motor::Motor(core::IMiddleware& middleware)
 : middleware(middleware), speed_01(0.0), speed_02(0.0) {
     snprintf(commandTaskName, sizeof(commandTaskName), "motor_command");
     snprintf(speedTaskName, sizeof(speedTaskName), "motor_speed");
-    LOG_INFO("[APP] [MOTOR: %u] [START] task=%s/%s]", id, commandTaskName, speedTaskName);
+    //LOG_INFO("[APP] [MOTOR: %u] [START] task=%s/%s]", id, commandTaskName, speedTaskName);
 } 
 
 void Motor::init() {
@@ -28,13 +28,13 @@ void Motor::init() {
         };
     middleware.enqueueTask(desc_command_task);
     middleware.enqueueTask(desc_speed_task);
-    LOG_INFO("[APP] [MOTOR: %u] [INIT]", id);
+    //LOG_INFO("[APP] [MOTOR: %u] [INIT]", id);
 }
 
 void Motor::control() {
     auto command_msg = core::MotorCommandMessage(0,-1000);
     middleware.publish(command_msg);
-    LOG_INFO("[APP] [MOTOR: %u] [CONTROL TASK]", id);
+    //LOG_INFO("[APP] [MOTOR: %u] [CONTROL TASK]", id);
 }
 
 void Motor::readSpeed() {

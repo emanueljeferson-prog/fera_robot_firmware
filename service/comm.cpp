@@ -4,11 +4,11 @@ namespace service {
 
 Router::Router()
 : spi(hal::SPI_TYPE::SPI0), i2c() {
-    //LOG_INFO("[SERVICE] [ROUTER] [START]");
+    ////LOG_INFO("[SERVICE] [ROUTER] [START]");
 }
 
 void Router::read(const uint8_t address, std::vector<uint8_t>& buffer, const size_t lenght, const core::ProtocolType protocol) {
-    //LOG_INFO("[SERVICE] [ROUTER] [READ]");
+    ////LOG_INFO("[SERVICE] [ROUTER] [READ]");
     switch (protocol) {
         case core::ProtocolType::SPI: {
             spi.readRegister(address, buffer, lenght);
@@ -28,11 +28,11 @@ void Router::write(const uint8_t address, const std::vector<uint8_t> buffer, con
 
 Communication::Communication(core::IMiddleware& middleware)
 : middleware(middleware), router() {
-    //LOG_INFO("[SERVICE] [COMMUNICATION] [START]");
+    ////LOG_INFO("[SERVICE] [COMMUNICATION] [START]");
 }
 
 void Communication::init() {
-    //LOG_INFO("[SERVICE] [COMMUNICATION] [INIT]");
+    ////LOG_INFO("[SERVICE] [COMMUNICATION] [INIT]");
     middleware.subscribe(
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::EXTERN_MESSAGE_SEND)) {

@@ -9,7 +9,6 @@ namespace service {
 typedef struct {
     bool motor_flag;
     bool imu_flag;
-    bool gps_flag;
 } SensorDataStatus_t;
 
 class StateMachine {
@@ -28,7 +27,6 @@ public:
 private:
     bool speed_flag; 
     bool imu_flag;
-    bool gps_flag;
     States state; 
 };
 
@@ -43,7 +41,6 @@ private:
     core::IMiddleware& middleware;  
     robot_interfaces__msg__SpeedCmd* speed_cmd;
     robot_interfaces__msg__SensorData* sensor_data;
-    robot_interfaces__msg__SystemConfig* system_config;
     SensorDataStatus_t sensor_data_status;
     IMicroRos microros; 
     StateMachine fms;

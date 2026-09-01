@@ -13,12 +13,12 @@ namespace {
 }
 
 ImuDrive::ImuDrive(core::IMiddleware& middleware)
-: middleware(middleware), acell_giro_device() {
-    //LOG_INFO("[SERVICE] [IMU DRIVE] [START]");
+: middleware(middleware), acell_giro_device(), mag_device(), mag_enabled(false) {
+    LOG_INFO("[SERVICE] [IMU DRIVE] [START]");
 }
 
 void ImuDrive::init() {
-    //LOG_INFO("[SERVICE] [IMU DRIVE] [INIT]");
+    LOG_INFO("[SERVICE] [IMU DRIVE] [INIT]");
     middleware.subscribe(
         [this](const core::Message& msg) {
             if (msg.compareTopic(core::Topics::READ_IMU)) {
@@ -30,31 +30,35 @@ void ImuDrive::init() {
         false
     );
 
-    hal::I2cConfig mpu6500Config;
-    mpu6500Config.i2c_port = i2c_default;
-    mpu6500Config.address = config::Mpu6500::ADDRESS;
-    mpu6500Config.sda = config::Mpu6500::SDA_PIN;
-    mpu6500Config.scl = config::Mpu6500::SCL_PIN;
-    mpu6500Config.baudrate = config::Mpu6500::BAUD_RATE;
-    mpu6500Config.who_ami_reg = config::Mpu6500::REG_WHO_AM_I;
-    acell_giro_device.init(mpu6500Config);
+    hal::I2cConfig i2cCfg;
+    i2cCfg.i2c_port = i2c_default;
+    i2cCfg.address = config::mpu6500Config.address;
+    i2cCfg.sda = config::mpu6500Config.sda_pin;
+    i2cCfg.scl = config::mpu6500Config.scl_pin;
+    i2cCfg.baudrate = config::mpu6500Config.i2c_baud_rate;
+    i2cCfg.who_ami_reg = config::mpu6500Config.reg_who_am_i;
+    acell_giro_device.init(i2cCfg);
+    acell_giro_device.scanBus("I2C bus scan after MPU6500 init");
     std::vector<uint8_t> whoami;
-    acell_giro_device.readRegister(mpu6500Config.address, config::Mpu6500::REG_WHO_AM_I, whoami, 1);
+    acell_giro_device.readRegister(i2cCfg.address, config::mpu6500Config.reg_who_am_i, whoami, 1);
     if (whoami.empty())
     {
         LOG_ERROR("[SERVICE] [IMU DRIVE] [DEVICE NOT DETECTED]");
     }
+    // 0x71 = MPU9250 (tem AK8963 embutido). 0x70/0x73/0x78/0x98 (varia por
+    // revisao) = MPU6500 puro, sem magnetometro nenhum no chip.
+    LOG_INFO("[SERVICE] [IMU DRIVE] [MPU WHOAMI] [0x%02X]", whoami.empty() ? 0xFF : whoami[0]);
 
     sleep_ms(10);
-    acell_giro_device.writeRegister(mpu6500Config.address, config::Mpu6500::REG_USER_CTRL, static_cast<uint8_t>(0x00));
+    acell_giro_device.writeRegister(config::mpu6500Config.address, config::mpu6500Config.reg_user_ctrl, static_cast<uint8_t>(0x00));
     sleep_ms(10);
-    acell_giro_device.writeRegister(mpu6500Config.address, config::Mpu6500::REG_PWR_MGMT_1, 0x00);
+    acell_giro_device.writeRegister(config::mpu6500Config.address, config::mpu6500Config.reg_pwr_mgmt_1, 0x00);
     sleep_ms(100);
-    //LOG_INFO("[SERVICE] [IMU DRIVE] [INIT] [DONE]");
+    LOG_INFO("[SERVICE] [IMU DRIVE] [INIT] [DONE]");
 }
 
 void ImuDrive::readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector3D& mag, double& temp) {
-    //LOG_INFO("[SERVICE] [IMU DRIVE] [READ IMU]");
+    LOG_INFO("[SERVICE] [IMU DRIVE] [READ IMU]");
     std::vector<int16_t> accelRaw(3);
     std::vector<int16_t> gyroRaw(3);
     std::vector<int16_t> magRaw(3);
@@ -69,10 +73,9 @@ void ImuDrive::readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector
     std::vector<uint8_t> mag_raw_data(6, 0);
     std::vector<uint8_t> temp_raw_data(2, 0);
 
-    acell_giro_device.readRegister(config::Mpu6500::ADDRESS, config::Mpu6500::REG_ACCEL_XOUT_H, accel_raw_data, 6);
-    acell_giro_device.readRegister(config::Mpu6500::ADDRESS, config::Mpu6500::REG_GYRO_XOUT_H, gyro_raw_data, 6);
-    //acell_giro_device.readRegister(config::Lsm303::ADDRESS, config::Lsm303::REG_MAG_XOUT_H, mag_raw_data, 6);
-    acell_giro_device.readRegister(config::Mpu6500::ADDRESS, config::Mpu6500::REG_TEMP_OUT_H, temp_raw_data, 2);
+    acell_giro_device.readRegister(config::mpu6500Config.address, config::mpu6500Config.reg_accel_xout_h, accel_raw_data, 6);
+    acell_giro_device.readRegister(config::mpu6500Config.address, config::mpu6500Config.reg_gyro_xout_h, gyro_raw_data, 6);
+    acell_giro_device.readRegister(config::mpu6500Config.address, config::mpu6500Config.reg_temp_out_h, temp_raw_data, 2);
 
     accelRaw[0] = toInt16(accel_raw_data[0], accel_raw_data[1]);
     accelRaw[1] = toInt16(accel_raw_data[2], accel_raw_data[3]);
@@ -82,22 +85,23 @@ void ImuDrive::readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector
     gyroRaw[1] = toInt16(gyro_raw_data[2], gyro_raw_data[3]);
     gyroRaw[2] = toInt16(gyro_raw_data[4], gyro_raw_data[5]);
 
-    magRaw[0] = toInt16(mag_raw_data[0], mag_raw_data[1]);
-    magRaw[1] = toInt16(mag_raw_data[2], mag_raw_data[3]);
-    magRaw[2] = toInt16(mag_raw_data[4], mag_raw_data[5]);
+    // Bloco vem como [XH, XL, ZH, ZL, YH, YL] -> atenção a ordem Z antes de Y.
+    /*magRaw[0] = toInt16(mag_raw_data[0], mag_raw_data[1]);  // X = XH,XL
+    magRaw[1] = toInt16(mag_raw_data[4], mag_raw_data[5]);  // Y = YH,YL (bytes 4,5)
+    magRaw[2] = toInt16(mag_raw_data[2], mag_raw_data[3]);  // Z = ZH,ZL (bytes 2,3)*/
 
     tempRaw[0] = toInt16(temp_raw_data[0], temp_raw_data[1]);
 
-    accel.x = accelRaw[0] * (config::ImuConfig::GRAVITY / config::Mpu6500::ACCEL_SENSITIVITY) + config::ImuConfig::accel_x_offset;
-    accel.y = accelRaw[1] * (config::ImuConfig::GRAVITY / config::Mpu6500::ACCEL_SENSITIVITY) + config::ImuConfig::accel_y_offset;
-    accel.z = accelRaw[2] * (config::ImuConfig::GRAVITY / config::Mpu6500::ACCEL_SENSITIVITY) + config::ImuConfig::accel_z_offset;
-    gyro.x = gyroRaw[0] * (config::ImuConfig::DEG2RAD / config::Mpu6500::GYRO_SENSITIVITY) + config::ImuConfig::gyro_x_offset;
-    gyro.y = gyroRaw[1] * (config::ImuConfig::DEG2RAD / config::Mpu6500::GYRO_SENSITIVITY) + config::ImuConfig::gyro_y_offset;
-    gyro.z = gyroRaw[2] * (config::ImuConfig::DEG2RAD / config::Mpu6500::GYRO_SENSITIVITY) + config::ImuConfig::gyro_z_offset;
-    mag.x = magRaw[0] * config::Lsm303::MAG_SENSITIVITY + config::ImuConfig::mag_x_offset;
-    mag.y = magRaw[1] * config::Lsm303::MAG_SENSITIVITY + config::ImuConfig::mag_y_offset;
-    mag.z = magRaw[2] * config::Lsm303::MAG_SENSITIVITY + config::ImuConfig::mag_z_offset;
-    temp = (tempRaw[0] / config::Mpu6500::TEMP_SENSITIVITY) + config::ImuConfig::temp_offset;
+    accel.x = accelRaw[0] * (config::ImuConfig::gravity / config::mpu6500Config.accel_sensitivity) + config::ImuConfig::accel_x_offset;
+    accel.y = -accelRaw[1] * (config::ImuConfig::gravity / config::mpu6500Config.accel_sensitivity) + config::ImuConfig::accel_y_offset;
+    accel.z = -accelRaw[2] * (config::ImuConfig::gravity / config::mpu6500Config.accel_sensitivity) + config::ImuConfig::accel_z_offset;
+    gyro.x = gyroRaw[0] * (config::ImuConfig::deg2rad / config::mpu6500Config.gyro_sensitivity) + config::ImuConfig::gyro_x_offset;
+    gyro.y = gyroRaw[1] * (config::ImuConfig::deg2rad / config::mpu6500Config.gyro_sensitivity) + config::ImuConfig::gyro_y_offset;
+    gyro.z = gyroRaw[2] * (config::ImuConfig::deg2rad / config::mpu6500Config.gyro_sensitivity) + config::ImuConfig::gyro_z_offset;
+    /*mag.x = magRaw[0] * config::Lsm303Dlhc::MAG_SCALE_XY + config::ImuConfig::mag_x_offset;
+    mag.y = magRaw[1] * config::Lsm303Dlhc::MAG_SCALE_XY + config::ImuConfig::mag_y_offset;
+    mag.z = magRaw[2] * config::Lsm303Dlhc::MAG_SCALE_Z + config::ImuConfig::mag_z_offset;*/
+    temp = (tempRaw[0] / config::mpu6500Config.temp_sensitivity) + config::ImuConfig::temp_offset;
     LOG_INFO("[SERVICE] [IMU DRIVE] [READ IMU] [DONE]");
 }
 

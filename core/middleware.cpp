@@ -4,7 +4,7 @@
 namespace core {
 
 Middleware::Middleware(): rtos() {
-    LOG_INFO("[CORE] [MIDDLEWARE] [START]");
+    //LOG_INFO("[CORE] [MIDDLEWARE] [START]");
 }
 
 void Middleware::subscribe(Callback cb, const Topics tp, bool delete_flag) {
@@ -12,13 +12,13 @@ void Middleware::subscribe(Callback cb, const Topics tp, bool delete_flag) {
 }
 
 void Middleware::publish(Message& msg) {
-    LOG_INFO("[CORE] [MIDDLEWARE] [PUBLISH TOPIC] [START]");
+    //LOG_INFO("[CORE] [MIDDLEWARE] [PUBLISH TOPIC] [START]");
     for(auto const& subscriber: subcribers) {
         if(msg.compareTopic(subscriber.topic)) {
             subscriber.callback(msg);
         }
     }
-    LOG_INFO("[CORE] [MIDDLEWARE] [PUBLISH TOPIC] [DONE]");
+    //LOG_INFO("[CORE] [MIDDLEWARE] [PUBLISH TOPIC] [DONE]");
 }
 
 void Middleware::enqueueTask(const TaskDescription desc) {

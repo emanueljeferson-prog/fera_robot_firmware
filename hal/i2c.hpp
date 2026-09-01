@@ -14,6 +14,7 @@ struct I2cConfig
     uint8_t scl;
     uint32_t baudrate;
     uint8_t who_ami_reg;
+    bool reset_on_init;
 };
 
 class I2c {
