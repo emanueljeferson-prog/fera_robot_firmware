@@ -6,12 +6,14 @@
 
 namespace config {
 
+inline uint8_t device_address = 0x02;
+
 inline bool configured_system_status = false;
 
 struct EncoderDriveConfig {
     uint8_t pin_a;
     uint8_t pin_b;
-    double conversion_factor;
+    double conversion_factor; // Meters per pulse
 };
 
 struct MotorDriveConfig {
@@ -23,6 +25,7 @@ struct MotorDriveConfig {
 };
 
 struct PIDConfig {
+    double ref;
     double kp;
     double ki;
     double kd;
@@ -43,84 +46,112 @@ struct MicroRosConfig {
     std::string system_config;
 };
 
+struct Mpu6500Config {
+    // I2C Address and pins
+    uint8_t address;
+    uint8_t sda_pin;
+    uint8_t scl_pin;
+    uint32_t i2c_baud_rate;
+    
+    // Sensitivities
+    double accel_sensitivity;  // LSB/g for ±2g
+    double gyro_sensitivity;   // LSB/(°/s) for ±250°/s
+    double temp_sensitivity;   // LSB/°C
+    
+    // Register addresses
+    uint8_t reg_accel_xout_h;
+    uint8_t reg_gyro_xout_h;
+    uint8_t reg_temp_out_h;
+    uint8_t reg_accel_config;
+    uint8_t reg_gyro_config;
+    uint8_t reg_pwr_mgmt_1;
+    uint8_t reg_pwr_mgmt_2;
+    uint8_t reg_user_ctrl;
+    uint8_t reg_i2c_mst_ctrl;
+    uint8_t reg_int_pin_cfg;
+    uint8_t reg_who_am_i;
+    uint8_t reg_i2c_slv0_addr;
+    uint8_t reg_i2c_slv0_reg;
+    uint8_t reg_i2c_slv0_ctrl;
+    uint8_t reg_ext_sens_data_00;
+    uint8_t reg_i2c_slv0_do;
+    uint8_t i2c_slv0_en;
+};
+
+struct ImuConfigStruct {
+    double gravity;
+    double deg2rad;
+};
+
 namespace Mpu6500 {
-    static constexpr uint8_t ADDRESS = 0x68;
-    static constexpr double ACCEL_SENSITIVITY = 16384.0; // LSB/g for ±2g
-    static constexpr double GYRO_SENSITIVITY = 131.0; // LSB/(°/s) for ±250°/s
-    static constexpr double TEMP_SENSITIVITY = 340.0; // LSB/°C
-    static constexpr uint8_t REG_ACCEL_XOUT_H = 0x3B;
-    static constexpr uint8_t REG_GYRO_XOUT_H = 0x43;
-    static constexpr uint8_t REG_TEMP_OUT_H = 0x41;
-    static constexpr uint8_t REG_ACCEL_CONFIG = 0x1C;
-    static constexpr uint8_t REG_GYRO_CONFIG = 0x1B;
-    static constexpr uint8_t REG_PWR_MGMT_1 = 0x6B;
-    static constexpr uint8_t REG_PWR_MGMT_2 = 0x6C;
-    static constexpr uint8_t REG_USER_CTRL = 0x6A;
-    static constexpr uint8_t REG_I2C_MST_CTRL = 0x24;
-    static constexpr uint8_t REG_INT_PIN_CFG = 0x37;
-    static constexpr uint8_t REG_WHO_AM_I = 0x75;
-    static constexpr uint8_t REG_I2C_SLV0_ADDR = 0x25;
-    static constexpr uint8_t REG_I2C_SLV0_REG = 0x26;
-    static constexpr uint8_t REG_I2C_SLV0_CTRL = 0x27;
-    static constexpr uint8_t REG_EXT_SENS_DATA_00 = 0x49;
-    static constexpr uint8_t REG_I2C_SLV0_DO = 0x63;
-    static constexpr uint8_t I2C_SLV0_EN = 0x80;
-    static constexpr uint8_t SDA_PIN = 4;
-    static constexpr uint8_t SCL_PIN = 5;
-    static constexpr uint32_t BAUD_RATE = 400000; // 400 kHz
+    // Keep as constexpr for compile-time use where needed, but provide inline versions
+    static constexpr uint8_t ADDRESS_DEFAULT = 0x68;
+    static constexpr double ACCEL_SENSITIVITY_DEFAULT = 16384.0;
+    static constexpr double GYRO_SENSITIVITY_DEFAULT = 131.0;
+    static constexpr double TEMP_SENSITIVITY_DEFAULT = 340.0;
 }
 
-namespace Lsm303 {
-    static constexpr uint8_t ACCEL_ADDRESS = 0x19;
-    static constexpr uint8_t MAG_ADDRESS = 0x1E;
-    static constexpr double ACCEL_SENSITIVITY = 1000.0; // LSB/g for ±2g
-    static constexpr double MAG_SENSITIVITY = 0.15; // μT/LSB for 16-bit output
-    static constexpr uint8_t REG_ACCEL_CTRL1 = 0x20;
-    static constexpr uint8_t REG_ACCEL_CTRL4 = 0x23;
-    static constexpr uint8_t REG_ACCEL_OUT_X_L = 0x28;
-    static constexpr uint8_t REG_MAG_CRA = 0x00;
-    static constexpr uint8_t REG_MAG_CRB = 0x01;
-    static constexpr uint8_t REG_MAG_MR = 0x02;
-    static constexpr uint8_t REG_MAG_XOUT_H = 0x03;
-    static constexpr uint8_t SDA_PIN = 4;
-    static constexpr uint8_t SCL_PIN = 5;
-    static constexpr uint32_t BAUD_RATE = 400000; // 400 kHz
-}
+inline Mpu6500Config mpu6500Config = {
+    0x68,      // address
+    0,         // sda_pin
+    1,         // scl_pin
+    400000,    // i2c_baud_rate
+    16384.0,   // accel_sensitivity
+    131.0,     // gyro_sensitivity
+    340.0,     // temp_sensitivity
+    0x3B,      // reg_accel_xout_h
+    0x43,      // reg_gyro_xout_h
+    0x41,      // reg_temp_out_h
+    0x1C,      // reg_accel_config
+    0x1B,      // reg_gyro_config
+    0x6B,      // reg_pwr_mgmt_1
+    0x6C,      // reg_pwr_mgmt_2
+    0x6A,      // reg_user_ctrl
+    0x24,      // reg_i2c_mst_ctrl
+    0x37,      // reg_int_pin_cfg
+    0x75,      // reg_who_am_i
+    0x25,      // reg_i2c_slv0_addr
+    0x26,      // reg_i2c_slv0_reg
+    0x27,      // reg_i2c_slv0_ctrl
+    0x49,      // reg_ext_sens_data_00
+    0x63,      // reg_i2c_slv0_do
+    0x80       // i2c_slv0_en
+};
 
 namespace ImuConfig {
-    static constexpr double GRAVITY = 9.80665; // m/s²
-    static constexpr double DEG2RAD = 3.14159265358979323846 / 180.0; // Degrees to radians conversion factor
-    static double accel_x_offset = 0.0; // g
-    static double accel_y_offset = 0.0; // g
-    static double accel_z_offset = 0.0; // g
-    static double gyro_x_offset = 0.0; // °/s
-    static double gyro_y_offset = 0.0; // °/s
-    static double gyro_z_offset = 0.0; // °/s
-    static double mag_x_offset = 0.0; // μT
-    static double mag_y_offset = 0.0; // μT
-    static double mag_z_offset = 0.0; // μT
-    static double temp_offset = 0.0; // °C
+    inline double gravity = 9.80665; // m/s²
+    inline double deg2rad = 3.14159265358979323846 / 180.0; // Degrees to radians conversion factor
+    inline double accel_x_offset = -0.719818; // g
+    inline double accel_y_offset = 0.052442; // g
+    inline double accel_z_offset = -0.188190; // g
+    inline double gyro_x_offset = 0.1106; // °/s
+    inline double gyro_y_offset = -0.0229; // °/s
+    inline double gyro_z_offset = -0.0119; // °/s
+    inline double mag_x_offset = 0.0; // μT
+    inline double mag_y_offset = 0.0; // μT
+    inline double mag_z_offset = 0.0; // μT
+    inline double temp_offset = 0.0; // °C
 }
 
 namespace TaskConfig {
-    static constexpr uint16_t imuTaskStackSize = 1024;
-    static constexpr uint16_t motorTaskStackSize = 1024;
-    static constexpr uint16_t urosTaskStackSize = 1024;
-    static constexpr uint16_t stateMachineTaskStackSize = 1024;
-    static constexpr uint16_t imuTaskPriority = 3;
-    static constexpr uint16_t motorTaskPriority = 3;
-    static constexpr uint16_t urosTaskPriority = 2;
-    static constexpr uint16_t stateMachineTaskPriority = 1;
-    static uint32_t imuTaskPeriodMs = 30;
-    static uint32_t motorTaskPeriodMs = 30;
-    static uint32_t gpsTaskPeriodMs = 30;
+    inline uint16_t imuTaskStackSize = 1024;
+    inline uint16_t motorTaskStackSize = 1024;
+    inline uint16_t urosTaskStackSize = 1024;
+    inline uint16_t stateMachineTaskStackSize = 1024;
+    inline uint16_t imuTaskPriority = 3;
+    inline uint16_t motorTaskPriority = 3;
+    inline uint16_t urosTaskPriority = 2;
+    inline uint16_t stateMachineTaskPriority = 1;
+    inline uint32_t imuTaskPeriodMs = 30;
+    inline uint32_t motorTaskPeriodMs = 30;
 }
 
-static std::array<MotorConfig, 2> motorConfigs = {
+inline std::array<MotorConfig, 2> motorConfigs = {
     MotorConfig{
         EncoderDriveConfig{18, 19, 34.57815},
         MotorDriveConfig{20, 21, 1000, 0, 0},
         PIDConfig{
+            0,
             0,
             0,
             0,
@@ -135,6 +166,7 @@ static std::array<MotorConfig, 2> motorConfigs = {
             0,
             0,
             0,
+            0,
             -100,
             100
         }
@@ -143,11 +175,10 @@ static std::array<MotorConfig, 2> motorConfigs = {
 
 static constexpr size_t motorCount = motorConfigs.size();
 
-static const MicroRosConfig microRosConfig {
+inline const MicroRosConfig microRosConfig {
     "pico_node",
     "sensor_data",
-    "speed_cmd",
-    "system_config"
+    "speed_cmd"
 };
 
 }
