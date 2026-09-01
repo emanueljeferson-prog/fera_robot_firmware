@@ -16,11 +16,9 @@ enum Topics {
     MOTOR_COMMAND,
     READ_SPEED,
     READ_IMU,
-    READ_GPS,
     UROS_SPEED,
     UROS_CMD,
     UROS_IMU,
-    UROS_GPS,
     EXTERN_MESSAGE_SEND,
     EXTERN_MESSAGE_RECEIVE
 };
@@ -120,13 +118,6 @@ public:
     const Vector3D gyro;
     const Vector3D mag;
     const double temp; 
-};
-
-struct MicroRosMessageGps: public Message {
-public:
-    MicroRosMessageGps(const std::string gps_data)
-    : gps_data(gps_data), Message(Topics::UROS_GPS) {}
-    const std::string gps_data;
 };
 
 struct ExternMessageSend: public Message {
