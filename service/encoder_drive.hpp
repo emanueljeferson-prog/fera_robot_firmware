@@ -11,7 +11,7 @@ class EncoderDrive: public IService {
 public:
     explicit EncoderDrive(core::IMiddleware& middleware);
     void init() override;
-    void readSpeed(uint8_t id, double& speed);
+    void readSpeed(uint8_t id, int16_t& speed);
     void registerEncoderDrive(uint8_t pinA, uint8_t pinB);
     static void pulseCallback(unsigned int gpio, long unsigned int event);
 
@@ -19,7 +19,7 @@ private:
     struct Channel {
         uint8_t pinA;
         uint8_t pinB;
-        int32_t pulseCount;
+        int16_t pulseCount;
     };
 
     core::IMiddleware& middleware;

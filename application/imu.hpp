@@ -16,7 +16,7 @@ private:
     core::Vector3D accel; 
     core::Vector3D gyro; 
     core::Vector3D mag; 
-    double temp;
+    int16_t temp;
     core::IMiddleware& middleware;
 };
 

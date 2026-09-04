@@ -71,16 +71,15 @@ void EncoderDrive::init() {
     ////LOG_INFO("[SERVICE] [ENCODER DRIVE] [INIT] [DONE]");
 }
 
-void EncoderDrive::readSpeed(uint8_t id, double& speed) {
-    if(channels.empty()) {
-        speed = 0.0;
+void EncoderDrive::readSpeed(uint8_t id, int16_t& speed) {
+    const auto periodMs = config::TaskConfig::motorTaskPeriodMs;
+    if(id >= channels.size() || periodMs == 0) {
+        speed = 0;
         return;
     }
-    double fc = config::motorConfigs[id].encoder.conversion_factor;
-    double delta_pulses = static_cast<double>(channels[id].pulseCount);
-    double delta_time = static_cast<double>(config::TaskConfig::motorTaskPeriodMs) / 1000.0; // Convert ms to seconds
-    speed = (delta_pulses * fc) / delta_time; // Calculate speed in units per second
-    channels[id].pulseCount = 0; // Reset pulse count after reading
+    const int32_t pulsesPerSecond = static_cast<int32_t>(channels[id].pulseCount) * (1000 / periodMs);
+    speed = static_cast<int16_t>(pulsesPerSecond);
+    channels[id].pulseCount = 0;
 }
 
 void EncoderDrive::pulseCallback(unsigned int gpio, long unsigned int event) {

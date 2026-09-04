@@ -13,7 +13,6 @@ inline bool configured_system_status = false;
 struct EncoderDriveConfig {
     uint8_t pin_a;
     uint8_t pin_b;
-    double conversion_factor; // Meters per pulse
 };
 
 struct MotorDriveConfig {
@@ -53,11 +52,6 @@ struct Mpu6500Config {
     uint8_t scl_pin;
     uint32_t i2c_baud_rate;
     
-    // Sensitivities
-    double accel_sensitivity;  // LSB/g for ±2g
-    double gyro_sensitivity;   // LSB/(°/s) for ±250°/s
-    double temp_sensitivity;   // LSB/°C
-    
     // Register addresses
     uint8_t reg_accel_xout_h;
     uint8_t reg_gyro_xout_h;
@@ -78,27 +72,11 @@ struct Mpu6500Config {
     uint8_t i2c_slv0_en;
 };
 
-struct ImuConfigStruct {
-    double gravity;
-    double deg2rad;
-};
-
-namespace Mpu6500 {
-    // Keep as constexpr for compile-time use where needed, but provide inline versions
-    static constexpr uint8_t ADDRESS_DEFAULT = 0x68;
-    static constexpr double ACCEL_SENSITIVITY_DEFAULT = 16384.0;
-    static constexpr double GYRO_SENSITIVITY_DEFAULT = 131.0;
-    static constexpr double TEMP_SENSITIVITY_DEFAULT = 340.0;
-}
-
 inline Mpu6500Config mpu6500Config = {
     0x68,      // address
     0,         // sda_pin
     1,         // scl_pin
     400000,    // i2c_baud_rate
-    16384.0,   // accel_sensitivity
-    131.0,     // gyro_sensitivity
-    340.0,     // temp_sensitivity
     0x3B,      // reg_accel_xout_h
     0x43,      // reg_gyro_xout_h
     0x41,      // reg_temp_out_h
@@ -118,21 +96,6 @@ inline Mpu6500Config mpu6500Config = {
     0x80       // i2c_slv0_en
 };
 
-namespace ImuConfig {
-    inline double gravity = 9.80665; // m/s²
-    inline double deg2rad = 3.14159265358979323846 / 180.0; // Degrees to radians conversion factor
-    inline double accel_x_offset = -0.719818; // g
-    inline double accel_y_offset = 0.052442; // g
-    inline double accel_z_offset = -0.188190; // g
-    inline double gyro_x_offset = 0.1106; // °/s
-    inline double gyro_y_offset = -0.0229; // °/s
-    inline double gyro_z_offset = -0.0119; // °/s
-    inline double mag_x_offset = 0.0; // μT
-    inline double mag_y_offset = 0.0; // μT
-    inline double mag_z_offset = 0.0; // μT
-    inline double temp_offset = 0.0; // °C
-}
-
 namespace TaskConfig {
     inline uint16_t imuTaskStackSize = 1024;
     inline uint16_t motorTaskStackSize = 1024;
@@ -148,7 +111,7 @@ namespace TaskConfig {
 
 inline std::array<MotorConfig, 2> motorConfigs = {
     MotorConfig{
-        EncoderDriveConfig{18, 19, 34.57815},
+        EncoderDriveConfig{18, 19},
         MotorDriveConfig{20, 21, 1000, 0, 0},
         PIDConfig{
             0,
@@ -160,7 +123,7 @@ inline std::array<MotorConfig, 2> motorConfigs = {
         }
     },
     MotorConfig{
-        EncoderDriveConfig{16, 17, 34.57815},
+        EncoderDriveConfig{16, 17},
         MotorDriveConfig{22, 23, 1000, 0, 0},
         PIDConfig{
             0,

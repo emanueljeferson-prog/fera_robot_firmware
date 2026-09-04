@@ -36,12 +36,12 @@ enum ProtocolType {
 };
 
 struct Vector3D {
-    double x;
-    double y;
-    double z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
     
     Vector3D() : x(0), y(0), z(0) {}
-    Vector3D(double x, double y, double z) : x(x), y(y), z(z) {}
+    Vector3D(int16_t x, int16_t y, int16_t z) : x(x), y(y), z(z) {}
     Vector3D(const Vector3D& other) : x(other.x), y(other.y), z(other.z) {}
     
     Vector3D& operator=(const Vector3D& other) {
@@ -53,8 +53,6 @@ struct Vector3D {
         return *this;
     }
     
-    // Conversão automática para geometry_msgs__msg__Point (definida em uros)
-    operator struct geometry_msgs__msg__Point() const;
 };   
 
 struct TaskDescription {
@@ -78,20 +76,20 @@ private:
 
 struct ReadImuMessage: public Message {
 public:
-    ReadImuMessage(Vector3D& accel, Vector3D& gyro, Vector3D& mag, double& temp)
+    ReadImuMessage(Vector3D& accel, Vector3D& gyro, Vector3D& mag, int16_t& temp)
     : accel(accel), gyro(gyro), mag(mag), temp(temp), Message(Topics::READ_IMU) {}
     Vector3D& accel;
     Vector3D& gyro;
     Vector3D& mag;
-    double& temp; 
+    int16_t& temp; 
 };
 
 struct ReadSpeedMessage: public Message {
 public:
-    ReadSpeedMessage(const uint8_t id, double& speed)
+    ReadSpeedMessage(const uint8_t id, int16_t& speed)
     : id(id), speed(speed), Message(Topics::READ_SPEED) {}
     const uint8_t id;
-    double& speed;
+    int16_t& speed;
 };
 
 struct MotorCommandMessage: public Message {
@@ -104,20 +102,20 @@ public:
 
 struct MicroRosMessageSpeed: public Message {
 public:
-    MicroRosMessageSpeed(const double speed_1, const double speed_2)
+    MicroRosMessageSpeed(const int16_t speed_1, const int16_t speed_2)
     : speed_1(speed_1), speed_2(speed_2), Message(Topics::UROS_SPEED) {}
-    const double speed_1;
-    const double speed_2;
+    const int16_t speed_1;
+    const int16_t speed_2;
 };
 
 struct MicroRosMessageImu: public Message {
 public:
-    MicroRosMessageImu(const Vector3D accel, const Vector3D gyro, const Vector3D mag, const double temp)
+    MicroRosMessageImu(const Vector3D accel, const Vector3D gyro, const Vector3D mag, const int16_t temp)
     : accel(std::move(accel)), gyro(std::move(gyro)), mag(std::move(mag)), temp(temp), Message(Topics::UROS_IMU) {}
     const Vector3D accel;
     const Vector3D gyro;
     const Vector3D mag;
-    const double temp; 
+    const int16_t temp; 
 };
 
 struct ExternMessageSend: public Message {

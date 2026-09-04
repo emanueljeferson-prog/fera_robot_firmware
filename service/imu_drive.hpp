@@ -13,7 +13,7 @@ public:
     void init() override;
     //void initMpu6500();
     //void initLsm303();
-    void readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector3D& mag, double& temp);
+    void readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector3D& mag, int16_t& temp);
 private:
     core::IMiddleware& middleware;
     hal::I2c acell_giro_device; // MPU9250/6500: acelerometro + giroscopio

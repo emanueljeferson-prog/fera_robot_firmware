@@ -55,19 +55,19 @@ void MicroRos::init() {
     };
     auto subscription_callback = [this](const void* message) {
         *speed_cmd = *(robot_interfaces__msg__SpeedCmd*)(message);
-        sensor_data->motor_speed_01 = speed_cmd->motor_cmd_01;
-        sensor_data->motor_speed_02 = speed_cmd->motor_cmd_02;
+        sensor_data->motor_speed_left = speed_cmd->motor_cmd_left;
+        sensor_data->motor_speed_right = speed_cmd->motor_cmd_right;
         // Update motorConfigs with the received speed command and PID parameters - motor 1
-        config::motorConfigs[0].pid.ref = speed_cmd->motor_cmd_01;
-        config::motorConfigs[0].pid.kp = speed_cmd->motor_kp_01;
-        config::motorConfigs[0].pid.ki = speed_cmd->motor_ki_01;
-        config::motorConfigs[0].pid.kd = speed_cmd->motor_kd_01;
+        config::motorConfigs[0].pid.ref = speed_cmd->motor_cmd_left;
+        config::motorConfigs[0].pid.kp = speed_cmd->motor_kp_left;
+        config::motorConfigs[0].pid.ki = speed_cmd->motor_ki_left;
+        config::motorConfigs[0].pid.kd = speed_cmd->motor_kd_left;
         // Update motorConfigs with the received speed command and PID parameters - motor 2
-        config::motorConfigs[1].pid.ref = speed_cmd->motor_cmd_02;
-        config::motorConfigs[1].pid.kp = speed_cmd->motor_kp_02;
-        config::motorConfigs[1].pid.ki = speed_cmd->motor_ki_02;
-        config::motorConfigs[1].pid.kd = speed_cmd->motor_kd_02;
-        //LOG_INFO("[SERVICE] [MICROROS] [SUBSCRIPTION] ref motor1: %f ----------- ref motor2: %f", speed_cmd->motor_01, speed_cmd->motor_02);
+        config::motorConfigs[1].pid.ref = speed_cmd->motor_cmd_right;
+        config::motorConfigs[1].pid.kp = speed_cmd->motor_kp_right;
+        config::motorConfigs[1].pid.ki = speed_cmd->motor_ki_right;
+        config::motorConfigs[1].pid.kd = speed_cmd->motor_kd_right;
+        //LOG_INFO("[SERVICE] [MICROROS] [SUBSCRIPTION] ref motor1: %f ----------- ref motor2: %f", speed_cmd->motor_left, speed_cmd->motor_right);
     };
     auto desc_timer_task = 
         core::TaskDescription{
@@ -86,8 +86,8 @@ void MicroRos::init() {
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::UROS_SPEED)) {
                 const auto& speed_msg = static_cast<const core::MicroRosMessageSpeed&>(msg); 
-                sensor_data->motor_speed_01 = speed_msg.speed_1;
-                sensor_data->motor_speed_02 = speed_msg.speed_2;
+                sensor_data->motor_speed_left = speed_msg.speed_1;
+                sensor_data->motor_speed_right = speed_msg.speed_2;
                 fms.update(core::Topics::UROS_SPEED);
             }
         },
@@ -98,9 +98,15 @@ void MicroRos::init() {
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::UROS_IMU)) {
                 const auto& imu_msg = static_cast<const core::MicroRosMessageImu&>(msg); 
-                sensor_data->accel = imu_msg.accel; 
-                sensor_data->gyro = imu_msg.gyro; 
-                sensor_data->mag = imu_msg.mag; 
+                sensor_data->accel.x = imu_msg.accel.x;
+                sensor_data->accel.y = imu_msg.accel.y;
+                sensor_data->accel.z = imu_msg.accel.z;
+                sensor_data->gyro.x = imu_msg.gyro.x;
+                sensor_data->gyro.y = imu_msg.gyro.y;
+                sensor_data->gyro.z = imu_msg.gyro.z;
+                sensor_data->mag.x = imu_msg.mag.x;
+                sensor_data->mag.y = imu_msg.mag.y;
+                sensor_data->mag.z = imu_msg.mag.z;
                 sensor_data->temperature = imu_msg.temp; 
                 fms.update(core::Topics::UROS_IMU);
             }
@@ -161,19 +167,6 @@ void StateMachine::reset() {
     speed_flag = false; 
     imu_flag = false; 
     state = States::INIT; 
-}
-
-}
-
-// Implementação do operador de conversão Vector3D -> geometry_msgs__msg__Point
-namespace core {
-
-Vector3D::operator geometry_msgs__msg__Point() const {
-    geometry_msgs__msg__Point point;
-    point.x = x;
-    point.y = y;
-    point.z = z;
-    return point;
 }
 
 }

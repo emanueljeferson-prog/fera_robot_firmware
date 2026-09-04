@@ -25,7 +25,7 @@ void Imu::readImu() {
     core::Vector3D _accel;
     core::Vector3D _gyro;
     core::Vector3D _mag;
-    double _temp;
+    int16_t _temp;
 
     auto get_imu_data_msg = core::ReadImuMessage(_accel, _gyro, _mag, _temp);
     middleware.publish(get_imu_data_msg);

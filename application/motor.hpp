@@ -14,7 +14,7 @@ public:
     static void controlWrapper(void* params);
     static void readSpeedWrapper(void* params);
 private: 
-    double speed_01, speed_02; 
+    int16_t speed_01, speed_02; 
     core::IMiddleware& middleware;
     char commandTaskName[16];
     char speedTaskName[16];
