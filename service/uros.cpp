@@ -55,8 +55,8 @@ void MicroRos::init() {
     };
     auto subscription_callback = [this](const void* message) {
         *speed_cmd = *(robot_interfaces__msg__SpeedCmd*)(message);
-        sensor_data->motor_speed_left = speed_cmd->motor_cmd_left;
-        sensor_data->motor_speed_right = speed_cmd->motor_cmd_right;
+        //sensor_data->motor_speed_left = speed_cmd->motor_cmd_left;
+        //sensor_data->motor_speed_right = speed_cmd->motor_cmd_right;
         // Update motorConfigs with the received speed command and PID parameters - motor 1
         config::motorConfigs[0].pid.ref = speed_cmd->motor_cmd_left;
         config::motorConfigs[0].pid.kp = speed_cmd->motor_kp_left;

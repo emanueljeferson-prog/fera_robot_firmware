@@ -15,6 +15,7 @@ target_link_libraries(hal
     pico_stdlib
     hardware_spi
     hardware_i2c
-    hardware_gpio
+    #hardware_gpio
     hardware_pwm
+    hardware_irq
 )

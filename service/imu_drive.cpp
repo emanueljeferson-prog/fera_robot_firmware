@@ -69,8 +69,8 @@ void ImuDrive::readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector
     acell_giro_device.readRegister(config::mpu6500Config.address, config::mpu6500Config.reg_gyro_xout_h, gyro_raw_data, 6);
     acell_giro_device.readRegister(config::mpu6500Config.address, config::mpu6500Config.reg_temp_out_h, temp_raw_data, 2);
 
-    accel.x = toInt16(accel_raw_data[0], accel_raw_data[1]);
-    accel.y = -toInt16(accel_raw_data[2], accel_raw_data[3]);
+    accel.x = -toInt16(accel_raw_data[0], accel_raw_data[1]);
+    accel.y = toInt16(accel_raw_data[2], accel_raw_data[3]);
     accel.z = -toInt16(accel_raw_data[4], accel_raw_data[5]);
 
     gyro.x = toInt16(gyro_raw_data[0], gyro_raw_data[1]);

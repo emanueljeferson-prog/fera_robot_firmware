@@ -77,9 +77,10 @@ void EncoderDrive::readSpeed(uint8_t id, int16_t& speed) {
         speed = 0;
         return;
     }
-    const int32_t pulsesPerSecond = static_cast<int32_t>(channels[id].pulseCount) * (1000 / periodMs);
+    /*const int32_t pulsesPerSecond = static_cast<int32_t>(channels[id].pulseCount) * (1000 / periodMs);
     speed = static_cast<int16_t>(pulsesPerSecond);
-    channels[id].pulseCount = 0;
+    channels[id].pulseCount = 0;*/
+    speed = channels[id].pulseCount;
 }
 
 void EncoderDrive::pulseCallback(unsigned int gpio, long unsigned int event) {

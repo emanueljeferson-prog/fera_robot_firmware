@@ -3,7 +3,7 @@
 namespace app {
 
 Motor::Motor(core::IMiddleware& middleware)
-: middleware(middleware), speed_01(0.0), speed_02(0.0) {
+: middleware(middleware), speed_01(0), speed_02(0) {
     snprintf(commandTaskName, sizeof(commandTaskName), "motor_command");
     snprintf(speedTaskName, sizeof(speedTaskName), "motor_speed");
     //LOG_INFO("[APP] [MOTOR: %u] [START] task=%s/%s]", id, commandTaskName, speedTaskName);
@@ -32,8 +32,12 @@ void Motor::init() {
 }
 
 void Motor::control() {
-    auto command_msg = core::MotorCommandMessage(0,-1000);
-    middleware.publish(command_msg);
+    auto ref_01 = config::motorConfigs[0].pid.ref;
+    auto ref_02 = config::motorConfigs[1].pid.ref;
+    auto command_msg_01 = core::MotorCommandMessage(0, 1000);
+    //auto command_msg_02 = core::MotorCommandMessage(1, 500);
+    middleware.publish(command_msg_01);
+    //middleware.publish(command_msg_02);
     //LOG_INFO("[APP] [MOTOR: %u] [CONTROL TASK]", id);
 }
 

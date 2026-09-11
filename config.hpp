@@ -111,7 +111,7 @@ namespace TaskConfig {
 
 inline std::array<MotorConfig, 2> motorConfigs = {
     MotorConfig{
-        EncoderDriveConfig{18, 19},
+        EncoderDriveConfig{19, 18},
         MotorDriveConfig{20, 21, 1000, 0, 0},
         PIDConfig{
             0,
@@ -124,7 +124,7 @@ inline std::array<MotorConfig, 2> motorConfigs = {
     },
     MotorConfig{
         EncoderDriveConfig{16, 17},
-        MotorDriveConfig{22, 23, 1000, 0, 0},
+        MotorDriveConfig{22, 26, 1000, 0, 0},
         PIDConfig{
             0,
             0,

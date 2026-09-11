@@ -13,6 +13,7 @@ private:
     uint8_t pin;
     uint32_t slice_num;
     uint32_t chann;
+    const uint16_t PWM_WRAP = 1000;
 };
 
 }

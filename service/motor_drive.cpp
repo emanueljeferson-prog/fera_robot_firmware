@@ -40,9 +40,9 @@ void MotorDrive::init() {
 
 void MotorDrive::move(uint8_t id, int16_t signal) {
     if(signal > 0) {
-        moveFoward(id, signal);
+        moveFoward(id, static_cast<uint16_t>(signal));
     } else if(signal < 0) {
-        moveBackward(id, -signal);
+        moveBackward(id, static_cast<uint16_t>(abs(signal)));
     } else {
         stop(id);
     }
