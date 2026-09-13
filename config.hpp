@@ -10,6 +10,11 @@ inline uint8_t device_address = 0x02;
 
 inline bool configured_system_status = false;
 
+enum MotorId {
+    MOTOR_RIGHT,
+    MOTOR_LEFT
+};
+
 struct EncoderDriveConfig {
     uint8_t pin_a;
     uint8_t pin_b;
@@ -18,6 +23,7 @@ struct EncoderDriveConfig {
 struct MotorDriveConfig {
     uint8_t pin_a;
     uint8_t pin_b;
+    uint8_t pin_pwm;
     uint32_t pwm_wrap;
     int16_t dead_zone_min;
     int16_t dead_zone_max; 
@@ -30,6 +36,7 @@ struct PIDConfig {
     double kd;
     int32_t out_min;
     int32_t out_max;
+    double e_k1;
 };
 
 struct MotorConfig {
@@ -105,33 +112,33 @@ namespace TaskConfig {
     inline uint16_t motorTaskPriority = 3;
     inline uint16_t urosTaskPriority = 2;
     inline uint16_t stateMachineTaskPriority = 1;
-    inline uint32_t imuTaskPeriodMs = 30;
+    inline uint32_t imuTaskPeriodMs = 20;
     inline uint32_t motorTaskPeriodMs = 30;
 }
 
 inline std::array<MotorConfig, 2> motorConfigs = {
     MotorConfig{
-        EncoderDriveConfig{19, 18},
-        MotorDriveConfig{20, 21, 1000, 0, 0},
+        EncoderDriveConfig{16, 17},
+        MotorDriveConfig{20, 21, 27, 1000, -200, 200},
         PIDConfig{
             0,
-            0,
-            0,
-            0,
-            -100,
-            100
+            5.5,
+            1.5,
+            0.0,
+            -1000,
+            1000
         }
     },
     MotorConfig{
-        EncoderDriveConfig{16, 17},
-        MotorDriveConfig{22, 26, 1000, 0, 0},
+        EncoderDriveConfig{19, 18},
+        MotorDriveConfig{22, 26, 28, 1000, -200, 200},
         PIDConfig{
             0,
-            0,
-            0,
-            0,
-            -100,
-            100
+            5.5,
+            1.5,
+            0.0,
+            -1000,
+            1000
         }
     }
 };

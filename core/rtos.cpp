@@ -16,11 +16,11 @@ void RtosTimer::delay_ms(const uint32_t delay_ms) {
 
 Rtos::Rtos() {
     tickStartTime = xTaskGetTickCount();
-    //LOG_INFO("[SERVICE] [RTOS] [START]");
+    ////LOG_INFO("[SERVICE] [RTOS] [START]");
 }
 
 void Rtos::createTask(const core::TaskDescription desc) {
-    //LOG_INFO("[SERVICE] [RTOS] [TASK CREATED]: %s", desc.task_name);
+    ////LOG_INFO("[SERVICE] [RTOS] [TASK CREATED]: %s", desc.task_name);
     if( xTaskCreate(
         desc.task,
         desc.task_name,
@@ -31,11 +31,11 @@ void Rtos::createTask(const core::TaskDescription desc) {
     ) != pdPASS) {
         //LOG_ERROR("[ERROR] [SERVICE] [RTOS] [TASK CREATION FAILED]: %s", desc.task_name);
     }
-    //LOG_INFO("[SERVICE] [RTOS] [TASK CREATED]: %s [DONE]", desc.task_name);
+    ////LOG_INFO("[SERVICE] [RTOS] [TASK CREATED]: %s [DONE]", desc.task_name);
 }
 
 void Rtos::startScheduler() {
-    //LOG_INFO("[SERVICE] [RTOS] [START SCHEDULER]");
+    ////LOG_INFO("[SERVICE] [RTOS] [START SCHEDULER]");
     vTaskStartScheduler();
 }
 

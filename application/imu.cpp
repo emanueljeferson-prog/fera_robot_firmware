@@ -4,11 +4,11 @@ namespace app {
 
 Imu::Imu(core::IMiddleware& middleware)
 : middleware(middleware) {
-    LOG_INFO("[APP] [IMU] [START]");
+    ////LOG_INFO("[APP] [IMU] [START]");
 }
 
 void Imu::init() {
-    LOG_INFO("[APP] [IMU] [INIT]");
+    ////LOG_INFO("[APP] [IMU] [INIT]");
     auto desc_imu_task = 
         core::TaskDescription{
             .task_name = "imu_task",
@@ -18,7 +18,7 @@ void Imu::init() {
             .parameters = this
         };
     middleware.enqueueTask(desc_imu_task);
-    LOG_INFO("[APP] [IMU] [INIT] [DONE]");
+    ////LOG_INFO("[APP] [IMU] [INIT] [DONE]");
 }
 
 void Imu::readImu() {
@@ -35,10 +35,10 @@ void Imu::readImu() {
     mag = _mag;
     temp = _temp;
 
-    LOG_INFO("[APP] [ACCEL] [x, y, z]: %f, %f, %f", accel.x, accel.y, accel.z);
-    LOG_INFO("[APP] [GYRO] [x, y, z]: %f, %f, %f", gyro.x, gyro.y, gyro.z);
-    LOG_INFO("[APP] [MAG] [x, y, z]: %f, %f, %f", mag.x, mag.y, mag.z);
-    LOG_INFO("[APP] [TEMP] [º]: %f", temp);
+    ////LOG_INFO("[APP] [ACCEL] [x, y, z]: %f, %f, %f", accel.x, accel.y, accel.z);
+    ////LOG_INFO("[APP] [GYRO] [x, y, z]: %f, %f, %f", gyro.x, gyro.y, gyro.z);
+    ////LOG_INFO("[APP] [MAG] [x, y, z]: %f, %f, %f", mag.x, mag.y, mag.z);
+    ////LOG_INFO("[APP] [TEMP] [º]: %f", temp);
 
     auto uros_imu_msg = core::MicroRosMessageImu(accel, gyro, mag, temp);
     middleware.publish(uros_imu_msg);

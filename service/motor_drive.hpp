@@ -2,6 +2,7 @@
 
 #include "service_base.hpp"
 #include "hal/pwm.hpp"
+#include "hal/gpio.hpp"
 
 namespace service {
 
@@ -13,11 +14,12 @@ public:
     void moveFoward(uint8_t id, uint16_t signal);
     void moveBackward(uint8_t id, uint16_t signal);
     void stop(uint8_t id);
-    void registerMotor(uint8_t pinA, uint8_t pinB);
+    void registerMotor(uint8_t pinA, uint8_t pinB, uint8_t pinPwm);
 private:
     struct Channel {
-        hal::Pwm pwmA;
-        hal::Pwm pwmB;
+        uint8_t pinA;
+        uint8_t pinB;
+        hal::Pwm pwm;
     };
     core::IMiddleware& middleware;
     std::vector<Channel> channels;

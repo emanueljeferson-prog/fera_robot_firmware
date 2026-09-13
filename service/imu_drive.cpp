@@ -14,11 +14,11 @@ namespace {
 
 ImuDrive::ImuDrive(core::IMiddleware& middleware)
 : middleware(middleware), acell_giro_device(), mag_device(), mag_enabled(false) {
-    LOG_INFO("[SERVICE] [IMU DRIVE] [START]");
+    ////LOG_INFO("[SERVICE] [IMU DRIVE] [START]");
 }
 
 void ImuDrive::init() {
-    LOG_INFO("[SERVICE] [IMU DRIVE] [INIT]");
+    ////LOG_INFO("[SERVICE] [IMU DRIVE] [INIT]");
     middleware.subscribe(
         [this](const core::Message& msg) {
             if (msg.compareTopic(core::Topics::READ_IMU)) {
@@ -47,18 +47,18 @@ void ImuDrive::init() {
     }
     // 0x71 = MPU9250 (tem AK8963 embutido). 0x70/0x73/0x78/0x98 (varia por
     // revisao) = MPU6500 puro, sem magnetometro nenhum no chip.
-    LOG_INFO("[SERVICE] [IMU DRIVE] [MPU WHOAMI] [0x%02X]", whoami.empty() ? 0xFF : whoami[0]);
+    ////LOG_INFO("[SERVICE] [IMU DRIVE] [MPU WHOAMI] [0x%02X]", whoami.empty() ? 0xFF : whoami[0]);
 
     sleep_ms(10);
     acell_giro_device.writeRegister(config::mpu6500Config.address, config::mpu6500Config.reg_user_ctrl, static_cast<uint8_t>(0x00));
     sleep_ms(10);
     acell_giro_device.writeRegister(config::mpu6500Config.address, config::mpu6500Config.reg_pwr_mgmt_1, 0x00);
     sleep_ms(100);
-    LOG_INFO("[SERVICE] [IMU DRIVE] [INIT] [DONE]");
+    ////LOG_INFO("[SERVICE] [IMU DRIVE] [INIT] [DONE]");
 }
 
 void ImuDrive::readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector3D& mag, int16_t& temp) {
-    LOG_INFO("[SERVICE] [IMU DRIVE] [READ IMU]");
+    ////LOG_INFO("[SERVICE] [IMU DRIVE] [READ IMU]");
 
     std::vector<uint8_t> accel_raw_data(6, 0);
     std::vector<uint8_t> gyro_raw_data(6, 0);
@@ -83,7 +83,7 @@ void ImuDrive::readImu(core::Vector3D& accel, core::Vector3D& gyro, core::Vector
     mag.z = toInt16(mag_raw_data[2], mag_raw_data[3]);  // Z = ZH,ZL (bytes 2,3)*/
 
     temp = toInt16(temp_raw_data[0], temp_raw_data[1]);
-    LOG_INFO("[SERVICE] [IMU DRIVE] [READ IMU] [DONE]");
+    ////LOG_INFO("[SERVICE] [IMU DRIVE] [READ IMU] [DONE]");
 }
 
 }

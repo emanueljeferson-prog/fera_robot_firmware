@@ -6,36 +6,41 @@ namespace service {
 MotorDrive::MotorDrive(core::IMiddleware& middleware)
 : middleware(middleware) {
     channels.clear();
-    ////LOG_INFO("[SERVICE] [MOTOR DRIVE] [START]");
+    //LOG_INFO("[SERVICE] [MOTOR DRIVE] [START]");
 }
 
-void MotorDrive::registerMotor(uint8_t pinA, uint8_t pinB) {
-    channels.push_back(Channel{hal::Pwm(pinA), hal::Pwm(pinB)});
-    ////LOG_INFO("[SERVICE] [MOTOR DRIVE] [MOTOR REGISTERED]");
+void MotorDrive::registerMotor(uint8_t pinA, uint8_t pinB, uint8_t pinPwm) {
+    channels.push_back(Channel{pinA, pinB, hal::Pwm(pinPwm)});
+    //LOG_INFO("[SERVICE] [MOTOR DRIVE] [MOTOR REGISTERED]");
 }
 
 void MotorDrive::init() {
-    ////LOG_INFO("[SERVICE] [MOTOR DRIVE] [INIT]");
     for(size_t i = 0; i < config::motorCount; ++i) {
         const auto& motorCfg = config::motorConfigs[i];
-        this->registerMotor(motorCfg.drive.pin_a, motorCfg.drive.pin_b);
+        this->registerMotor(motorCfg.drive.pin_a, motorCfg.drive.pin_b, motorCfg.drive.pin_pwm);
     }
 
     middleware.subscribe(
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::MOTOR_COMMAND)) {
-                const auto& command_msg = static_cast<const core::MotorCommandMessage&>(msg); 
+                const auto& command_msg = static_cast<const core::MotorCommandMessage&>(msg);
                 move(command_msg.id, command_msg.signal);
             }
         },
         core::Topics::MOTOR_COMMAND,
         false
     );
+
     for(auto& channel: channels) {
-        channel.pwmA.init();
-        channel.pwmB.init();
+        hal::Gpio::init(channel.pinA);
+        hal::Gpio::setOutput(channel.pinA);
+        hal::Gpio::write(channel.pinA, false);
+        hal::Gpio::init(channel.pinB);
+        hal::Gpio::setOutput(channel.pinB);
+        hal::Gpio::write(channel.pinB, false);
+        channel.pwm.init();
     }
-    ////LOG_INFO("[SERVICE] [MOTOR DRIVE] [INIT] [DONE]");
+    //LOG_INFO("[SERVICE] [MOTOR DRIVE] [INIT] [DONE]");
 }
 
 void MotorDrive::move(uint8_t id, int16_t signal) {
@@ -54,8 +59,9 @@ void MotorDrive::moveFoward(uint8_t id, uint16_t signal) {
     }
 
     Channel& channel = channels[id];
-    channel.pwmA.writePwm(signal);
-    channel.pwmB.writePwm(0);
+    hal::Gpio::write(channel.pinA, true);
+    hal::Gpio::write(channel.pinB, false);
+    channel.pwm.writePwm(signal);
 }
 
 void MotorDrive::moveBackward(uint8_t id, uint16_t signal) {
@@ -64,8 +70,9 @@ void MotorDrive::moveBackward(uint8_t id, uint16_t signal) {
     }
 
     Channel& channel = channels[id];
-    channel.pwmA.writePwm(0);
-    channel.pwmB.writePwm(signal);
+    hal::Gpio::write(channel.pinA, false);
+    hal::Gpio::write(channel.pinB, true);
+    channel.pwm.writePwm(signal);
 }
 
 void MotorDrive::stop(uint8_t id) {
@@ -74,8 +81,9 @@ void MotorDrive::stop(uint8_t id) {
     }
 
     Channel& channel = channels[id];
-    channel.pwmA.writePwm(0);
-    channel.pwmB.writePwm(0);
+    hal::Gpio::write(channel.pinA, false);
+    hal::Gpio::write(channel.pinB, false);
+    channel.pwm.writePwm(0);
 }
 
 }
