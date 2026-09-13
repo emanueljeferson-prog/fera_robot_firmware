@@ -75,8 +75,8 @@ void MicroRos::init() {
         [this](const core::Message& msg) {
             if(msg.compareTopic(core::Topics::UROS_SPEED)) {
                 const auto& speed_msg = static_cast<const core::MicroRosMessageSpeed&>(msg); 
-                sensor_data->motor_speed_left = speed_msg.speed_1;
-                sensor_data->motor_speed_right = speed_msg.speed_2;
+                sensor_data->motor_speed_right = speed_msg.speed_1;
+                sensor_data->motor_speed_left = speed_msg.speed_2;
             }
         },
         core::Topics::UROS_SPEED,
